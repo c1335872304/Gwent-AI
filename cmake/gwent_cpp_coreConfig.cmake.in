@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(OpenMP)
+include("${CMAKE_CURRENT_LIST_DIR}/gwent_cpp_coreTargets.cmake")
+
+check_required_components(gwent_cpp_core)

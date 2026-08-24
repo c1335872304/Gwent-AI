@@ -1,0 +1,4 @@
+play_hand p=0 cid=132310 row=melee side=self
+play_hand p=1 cid=203265 row=melee side=self
+play_hand p=0 cid=201698 row=ranged side=self
+choose_target p=0 cid=132310

@@ -1,0 +1,67 @@
+seed: 0
+device: auto
+run_dir: runs/ppo_250k_strategic_generations
+checkpoint_interval: 4
+collector:
+  num_envs: 128
+  max_batch_size: 128
+  base_seed: 0
+  reward_mode: strategic
+  reward_overrides:
+    # Final match result remains +1 / -1 and dominates all shaping.
+    # Round 1: earn one card=+0.15, even=+0.10, lose one=+0.05,
+    # lose two=-0.03. A close win adds at most +0.02 when relevant.
+    round1_win_base: 0.10
+    round1_card_cost_weight: 0.05
+    round1_excess_card_penalty: 0.03
+    # Round 2 is stricter: earn one=+0.15, even=+0.07,
+    # lose one=-0.04, lose two=-0.15.
+    round2_win_base: 0.07
+    round2_card_cost_weight: 0.08
+    round2_excess_card_penalty: 0.03
+    close_round_win_bonus: 0.02
+    close_round_win_margin_cap: 15
+    # Strategic mode intentionally does not use hard-coded PASS/overplay
+    # bonuses. Resource-efficient round outcomes provide that signal.
+    secured_pass_reward: 0.0
+    secured_overplay_cost: 0.0
+    max_step_reward_abs: 1.25
+  enable_invariants: false
+model:
+  num_attention_heads: 4
+  attention_layers: 1
+  dropout: 0.0
+  text_embedding_mode: npz
+  text_embedding_path: data/embeddings/supported_cards_text_embeddings_qwen1024.npz
+  text_embedding_dim: 1024
+  freeze_text_embeddings: true
+  use_candidate_object_attention: true
+  use_candidate_self_attention: true
+  hidden_dim: 128
+ppo:
+  # The training budget is counted in complete games, not decisions.
+  total_games: 250000
+  games_per_update: 2500
+  # Kept as a fallback when total_games=0. With the values above the run has
+  # exactly 100 generations.
+  updates: 100
+  steps_per_update: 2048
+  learning_rate: 0.0003
+  epochs: 3
+  minibatch_size: 2048
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_ratio: 0.2
+  value_coef: 0.5
+  entropy_coef: 0.01
+  max_grad_norm: 0.5
+  target_kl: 0.03
+  value_clip: 0.2
+eval:
+  # 4 generations x 2500 games = one major evaluation every 10k games.
+  interval: 4
+  games: 512
+  num_envs: 128
+  opponent: random
+  controlled_player: 0
+  deterministic: true

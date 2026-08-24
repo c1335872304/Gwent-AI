@@ -1,0 +1,4 @@
+# True special-card smoke under shuffled Deck A seed=0.
+# Player 0 hand index 5 is 猩红盛宴. With no enemy unit on board, both engines
+# should resolve it as a special-card play with no target and move it to cemetery.
+play_special p=0 h=5

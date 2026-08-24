@@ -1,0 +1,41 @@
+schema_version: 3
+name: insert_position_v1_warmstart_smoke
+status: ready
+description: 用 A/B 10万局 schema-v11/grammar-v4 强模型做 200 局迁移 smoke；验证 11/4 -> 12/5 权重迁移、新位置语义初始化和完整 PPO 链路。
+
+algorithm:
+  config: configs/training/ppo_128env_ab_strategic.yaml
+
+initialization:
+  mode: warm_start
+  checkpoint: artifacts/checkpoints/pre_insert_position/latest.pt
+  checkpoint_sha256: 86f2a5915be988b24c50c58faa7bdc7d6b12262b78f50dc3c608386a4bab9717
+  source_observation_schema: 11
+  source_action_grammar: 4
+  reset_optimizer: true
+
+budget:
+  total_games: 200
+  games_per_update: 100
+
+runtime:
+  num_envs: 32
+  max_batch_size: 32
+  minibatch_size: 512
+  collector_threads: 12
+  device: auto
+
+checkpoint:
+  interval_updates: 1
+
+evaluation:
+  enabled: false
+  every_updates: 0
+  games: 64
+  num_envs: 32
+  internal_promote_win_rate: 0.55
+
+execution:
+  run_dir: runs/tasks/insert_position_v1_warmstart_smoke
+  library: build-release/libgwent_core.so
+  resume: never

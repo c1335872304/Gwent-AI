@@ -1,0 +1,3 @@
+# m30: Imlerith melee deploy draws, requests discard, discards the selected unit, and boosts by its power.
+play_hand p=0 cid=201781 row=melee side=self
+choose_target p=0 cid=203265

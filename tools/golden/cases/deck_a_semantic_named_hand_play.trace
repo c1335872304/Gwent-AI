@@ -1,0 +1,2 @@
+# m26: semantic selectors may address hand cards by card_id instead of fragile hand index.
+play_hand p=0 cid=203099 row=melee side=self

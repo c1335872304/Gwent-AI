@@ -1,0 +1,45 @@
+build/
+build-*/
+cmake-build-*/
+.build/
+.agent-build/
+.vscode/
+.idea/
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Python caches
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Runtime training outputs; keep the directory contract/documentation.
+runs/*
+!runs/README.md
+
+# Pinned model metadata stays in git; large checkpoint binaries do not.
+artifacts/checkpoints/**/*.pt
+artifacts/checkpoints/**/*.pth
+artifacts/checkpoints/**/*.ckpt
+
+# Web product
+apps/web/backend/.venv/
+apps/web/backend/.env
+apps/web/frontend/node_modules/
+apps/web/frontend/dist/
+
+# Local service secrets/config
+services/*/.env
+apps/web/frontend/*.tsbuildinfo
+# Local inference model. Keep the slot/docs, not the binary artifact.
+models/**/*.pt
+models/**/*.pth
+models/**/*.ckpt
+models/**/installed.json
+

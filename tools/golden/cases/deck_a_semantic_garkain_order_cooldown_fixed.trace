@@ -1,0 +1,5 @@
+# m30: Garkain order starts cooldown immediately and resolves explicit enemy bleeding target.
+play_hand p=0 h=0 row=melee side=self
+play_hand p=1 h=1 row=melee side=self
+use_order p=0 source=self:melee:1
+choose_target p=0 target=enemy:melee:0

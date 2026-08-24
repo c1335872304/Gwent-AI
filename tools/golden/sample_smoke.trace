@@ -1,0 +1,6 @@
+play_hand p=0 h=0 row=melee side=self
+end_turn p=0
+play_hand p=1 h=0 row=ranged side=self
+end_turn p=1
+pass p=0
+pass p=1

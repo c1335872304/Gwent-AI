@@ -1,0 +1,2 @@
+play_hand p=0 h=1 row=melee side=self
+choose_row p=0 side=enemy row=ranged

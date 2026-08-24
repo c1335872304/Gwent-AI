@@ -1,0 +1,52 @@
+seed: 0
+device: auto
+run_dir: runs/ppo_debug
+checkpoint_interval: 1
+collector:
+  num_envs: 8
+  max_batch_size: 8
+  base_seed: 0
+  reward_mode: dense
+  reward_overrides:
+    score_delta_weight: 0.002
+    score_delta_contested_only: 1
+    card_play_cost: 0.03
+    leader_use_cost: 0.01
+    order_use_cost: 0.005
+    discard_card_cost: 0.01
+    secured_pass_reward: 0.08
+    secured_overplay_cost: 0.15
+    hand_delta_round_weight: 0.03
+  enable_invariants: false
+model:
+  num_attention_heads: 4
+  attention_layers: 1
+  dropout: 0.0
+  text_embedding_mode: npz
+  text_embedding_path: data/embeddings/supported_cards_text_embeddings_qwen1024.npz
+  text_embedding_dim: 1024
+  freeze_text_embeddings: true
+  use_candidate_object_attention: true
+  use_candidate_self_attention: true
+  hidden_dim: 64
+ppo:
+  updates: 2
+  steps_per_update: 64
+  learning_rate: 0.0003
+  epochs: 1
+  minibatch_size: 32
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_ratio: 0.2
+  value_coef: 0.5
+  entropy_coef: 0.01
+  max_grad_norm: 0.5
+  target_kl: 0.03
+  value_clip: 0.2
+eval:
+  interval: 1
+  games: 8
+  num_envs: 8
+  opponent: random
+  controlled_player: 0
+  deterministic: true

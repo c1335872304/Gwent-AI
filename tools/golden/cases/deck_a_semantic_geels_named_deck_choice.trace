@@ -1,0 +1,6 @@
+# m27: Geels devotion path uses named deck-card selection plus explicit row placement for selected unit.
+# seed=2 places Geels in player 0 hand while leaving Wild Hunt Rider in deck.
+play_hand p=0 cid=131102 row=melee side=self
+choose_target p=0 cid=132310
+choose_row p=0 side=self row=ranged
+choose_insert p=0 side=self row=ranged position=0

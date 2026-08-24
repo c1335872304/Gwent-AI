@@ -1,0 +1,8 @@
+# Fixed parity case: explicit pending target replay plus Regis turn-end growth.
+# 1) P0 plays 夜行吸血鬼.
+# 2) P1 plays 吸血鬼女 and the C++ kernel pauses for choose_target.
+# 3) P1 chooses P0's 夜行吸血鬼.
+# 雷吉斯：重生 now grows in hand/deck on owner turn_end when an enemy unit has bleeding; this should match Python.
+play_hand p=0 h=0 row=melee side=self
+play_hand p=1 h=0 row=melee side=self
+choose_target p=1 target=enemy:melee:1

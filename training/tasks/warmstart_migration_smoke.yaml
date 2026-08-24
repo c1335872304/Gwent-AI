@@ -1,0 +1,45 @@
+# 低成本验证真实强 checkpoint 的 v2→v3 warm-start 迁移链。
+schema_version: 3
+name: warmstart_migration_smoke
+status: ready
+description: 使用 pre-Mulligan 强模型做极小预算迁移训练，只验证 checkpoint 身份、模型迁移、optimizer 重置、v3 保存与 PPO 链路。
+
+algorithm:
+  config: configs/training/ppo_128env_strategic.yaml
+
+
+initialization:
+  mode: warm_start
+  checkpoint: artifacts/checkpoints/pre_mulligan_v2/update_000088.pt
+  checkpoint_sha256: 921dacf91fdbb11f924b6f2bda931b5ad46712d04706eb95c404cfc8175b35e1
+  source_observation_schema: 6
+  source_action_grammar: 2
+  reset_optimizer: true
+  reset_decision_embeddings: mulligan
+  reset_option_embeddings: mulligan,keep_hand
+
+budget:
+  total_games: 8
+  games_per_update: 8
+
+runtime:
+  num_envs: 8
+  max_batch_size: 8
+  minibatch_size: 32
+  collector_threads: 2
+  device: cpu
+
+checkpoint:
+  interval_updates: 1
+
+evaluation:
+  enabled: false
+  every_updates: 0
+  games: 8
+  num_envs: 8
+  internal_promote_win_rate: 0.55
+
+execution:
+  run_dir: runs/tasks/warmstart_migration_smoke
+  library: build-release/libgwent_core.so
+  resume: never

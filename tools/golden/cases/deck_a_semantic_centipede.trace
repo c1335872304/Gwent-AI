@@ -1,0 +1,2 @@
+# m30: Giant Centipede deploy gains armor from remaining hand count.
+play_hand p=0 cid=202437 row=melee side=self

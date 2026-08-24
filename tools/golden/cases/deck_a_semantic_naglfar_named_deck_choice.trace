@@ -1,0 +1,5 @@
+# m26: nested deck-play may select revealed candidates by card_id and then choose row explicitly.
+play_special p=0 cid=200301
+choose_target p=0 cid=202437
+choose_row p=0 side=self row=melee
+choose_insert p=0 side=self row=melee position=0

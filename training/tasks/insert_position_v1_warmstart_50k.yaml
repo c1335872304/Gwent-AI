@@ -1,0 +1,41 @@
+schema_version: 3
+name: insert_position_v1_warmstart_50k
+status: ready
+description: 从 A/B 10万局 schema-v11/grammar-v4 checkpoint 迁移到当前位置感知 schema-v12/grammar-v5，并继续 5 万完整对局自博弈适应训练。
+
+algorithm:
+  config: configs/training/ppo_128env_ab_strategic.yaml
+
+initialization:
+  mode: warm_start
+  checkpoint: artifacts/checkpoints/pre_insert_position/latest.pt
+  checkpoint_sha256: 86f2a5915be988b24c50c58faa7bdc7d6b12262b78f50dc3c608386a4bab9717
+  source_observation_schema: 11
+  source_action_grammar: 4
+  reset_optimizer: true
+
+budget:
+  total_games: 50000
+  games_per_update: 2500
+
+runtime:
+  num_envs: 512
+  max_batch_size: 512
+  minibatch_size: 2048
+  collector_threads: 12
+  device: auto
+
+checkpoint:
+  interval_updates: 2
+
+evaluation:
+  enabled: true
+  every_updates: 2
+  games: 2000
+  num_envs: 128
+  internal_promote_win_rate: 0.55
+
+execution:
+  run_dir: runs/tasks/insert_position_v1_warmstart_50k
+  library: build-release/libgwent_core.so
+  resume: auto

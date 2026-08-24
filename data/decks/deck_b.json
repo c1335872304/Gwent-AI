@@ -1,0 +1,30 @@
+{
+  "schema_version": "gwent-deck-v1",
+  "id": "deck_b",
+  "name": "Deck B - White Frost Tournament",
+  "card_set": "supported_cards",
+  "leader": "200055",
+  "stratagem": "202493",
+  "cards": [
+    {"id": "203158", "count": 1},
+    {"id": "202603", "count": 1},
+    {"id": "203265", "count": 1},
+    {"id": "202606", "count": 1},
+    {"id": "203159", "count": 1},
+    {"id": "132102", "count": 1},
+    {"id": "200301", "count": 1},
+    {"id": "202607", "count": 1},
+    {"id": "202608", "count": 1},
+    {"id": "131102", "count": 1},
+    {"id": "202609", "count": 1},
+    {"id": "132302", "count": 2},
+    {"id": "202610", "count": 2},
+    {"id": "202611", "count": 1},
+    {"id": "203160", "count": 2},
+    {"id": "202612", "count": 2},
+    {"id": "202614", "count": 1},
+    {"id": "202613", "count": 1},
+    {"id": "132309", "count": 1},
+    {"id": "200026", "count": 2}
+  ]
+}

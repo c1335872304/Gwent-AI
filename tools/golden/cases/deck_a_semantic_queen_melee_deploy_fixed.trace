@@ -1,0 +1,5 @@
+# m30: Queen of the Night melee deploy applies bleeding to an enemy unit.
+play_hand p=0 h=1 row=melee side=self
+play_hand p=1 h=1 row=melee side=self
+play_hand p=0 cid=202221 row=melee side=self
+choose_target p=0 target=enemy:melee:0

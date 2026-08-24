@@ -1,0 +1,39 @@
+# 低成本端到端任务，只验证 Orchestrator → train_ppo → checkpoint/eval 链。
+schema_version: 3
+name: trainer_smoke
+status: ready
+description: 低预算训练任务，用于服务器部署前验证环境和任务编排链。
+
+algorithm:
+  config: configs/training/ppo_debug.yaml
+
+
+initialization:
+  mode: random
+
+
+budget:
+  total_games: 16
+  games_per_update: 8
+
+runtime:
+  num_envs: 8
+  max_batch_size: 8
+  minibatch_size: 32
+  collector_threads: 2
+  device: cpu
+
+checkpoint:
+  interval_updates: 1
+
+evaluation:
+  enabled: true
+  every_updates: 1
+  games: 8
+  num_envs: 8
+  internal_promote_win_rate: 0.55
+
+execution:
+  run_dir: runs/tasks/trainer_smoke
+  library: build-release/libgwent_core.so
+  resume: never

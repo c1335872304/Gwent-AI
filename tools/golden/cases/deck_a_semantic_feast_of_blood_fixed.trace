@@ -1,0 +1,6 @@
+# Fixed parity case: Feast of Blood special resolves with explicit pending target.
+# P0 first controls a Vampire, P1 controls an enemy unit, then Feast purifies/damages and applies bleeding.
+play_hand p=0 h=0 row=melee side=self
+play_hand p=1 h=1 row=melee side=self
+play_special p=0 h=4
+choose_target p=0 target=enemy:melee:0

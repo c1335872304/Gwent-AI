@@ -1,0 +1,971 @@
+﻿{
+  "schema_version": "gwent-card-data-v1",
+  "card_set": "supported_cards",
+  "cards": [
+    {
+      "id": "202185",
+      "name": "腥膻之味",
+      "type": "leader",
+      "faction": "monsters",
+      "provision": 17,
+      "color": "Leader",
+      "rarity": "Legendary",
+      "description": "指令：使 1 个敌军单位重伤 3 回合。充能：3。所有充能均已使用后，在己方单排生成 1 只蝙魔。",
+      "categories": [
+        "领袖牌"
+      ],
+      "effect_ids": [
+        "leader:supported.blood_scent.leader"
+      ],
+      "metadata": {
+        "charges": "3",
+        "provision_bonus": "17",
+        "order": "true",
+        "requires_target": "enemy_unit",
+        "leader_target_selector": "enemy_unit"
+      }
+    },
+    {
+      "id": "202497",
+      "name": "注魔盔甲",
+      "type": "stratagem",
+      "color": "Gold",
+      "rarity": "Legendary",
+      "description": "指令：使手牌中 1 张单位牌获得 3 点增益和 2 点护甲。",
+      "effect_ids": [
+        "order:supported.armorer_workshop.order"
+      ],
+      "metadata": {
+        "order": "true",
+        "zeal": "true",
+        "order_target_selector": "own_hand_unit"
+      }
+    },
+    {
+      "id": "203099",
+      "name": "雷吉斯：重生",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 1,
+      "provision": 12,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "categories": [
+        "吸血鬼"
+      ],
+      "effect_ids": [
+        "deploy:supported.regis.deploy",
+        "turn_end:supported.regis.turn_end"
+      ],
+      "description": "部署：汲食 1 个敌军单位 3 点。己方回合结束时，若位于手牌或牌组中，且有敌军单位重伤，则自身基础战力提高 1 点。",
+      "metadata": {
+        "implementation": "partial",
+        "python_effect": "deck_a.regis_reborn",
+        "turn_end_active_zones": "hand,deck"
+      }
+    },
+    {
+      "id": "202889",
+      "name": "暗影长者",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 7,
+      "provision": 11,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "categories": [
+        "吸血鬼"
+      ],
+      "effect_ids": [
+        "deploy:supported.unseen_elder.deploy",
+        "turn_end:supported.unseen_elder.turn_end"
+      ],
+      "description": "部署：使 1 个敌军单位重伤 4 回合。己方回合结束时，随机使 1 名没有重伤的敌军单位重伤 2 回合。赤诚：己方回合结束时，还会对所有敌军单位触发重伤效果。",
+      "metadata": {
+        "implementation": "implemented",
+        "python_effect": "deck_a.unseen_elder"
+      }
+    },
+    {
+      "id": "202437",
+      "name": "巨型蜈蚣",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 16,
+      "provision": 10,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "categories": [
+        "类虫生物"
+      ],
+      "armor": 0,
+      "effect_ids": [
+        "deploy:supported.giant_centipede.deploy",
+        "armor_broken:supported.giant_centipede.armor_broken"
+      ],
+      "description": "部署：获得等同于手牌数量的护甲。若该单位没有护甲，或护甲被击破，则摧毁自身。",
+      "metadata": {
+        "implementation": "implemented",
+        "python_effect": "deck_a.giant_centipede"
+      }
+    },
+    {
+      "id": "202888",
+      "name": "狄拉夫·艾瑞廷",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 7,
+      "provision": 10,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "categories": [
+        "吸血鬼"
+      ],
+      "effect_ids": [
+        "deploy:supported.dettlaff.deploy",
+        "order:supported.dettlaff.order",
+        "card_destroyed:supported.dettlaff.deathblow"
+      ],
+      "description": "部署：在对方单排生成血月。指令：对 1 名带有重伤的敌军单位造成 1 点伤害。致死：在同排生成 1 只蝙魔。冷却：1。",
+      "metadata": {
+        "order": "true",
+        "zeal": "true",
+        "cooldown": "1",
+        "order_target_selector": "bleeding_enemy_unit",
+        "implementation": "implemented",
+        "python_effect": "deck_a.dettlaff_aep"
+      }
+    },
+    {
+      "id": "203265",
+      "name": "裂流之主",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 9,
+      "armor": 2,
+      "provision": 9,
+      "color": "Gold",
+      "rarity": "Epic",
+      "categories": [
+        "食人魔",
+        "战士"
+      ],
+      "effect_ids": [
+        "deploy:supported.lord_riptide.deploy",
+        "turn_end:supported.lord_riptide.hand_end"
+      ],
+      "description": "部署（近战）：与战力最高的敌军单位交锋。威势：己方回合结束时，若位于手牌中，则获得 1 点护甲。",
+      "metadata": {
+        "deploy_rows": "melee",
+        "implementation": "implemented",
+        "python_effect": "deck_a.lord_riptide"
+      }
+    },
+    {
+      "id": "132220",
+      "name": "卡塔卡恩",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 7,
+      "provision": 9,
+      "color": "Gold",
+      "rarity": "Epic",
+      "categories": [
+        "吸血鬼"
+      ],
+      "effect_ids": [
+        "deploy:supported.katakan.deploy",
+        "order:supported.katakan.order"
+      ],
+      "description": "狂热、指令：生成 1 只蝙魔至同排。冷却：4。每有 1 个敌军单位遭受重伤，则冷却 -1。",
+      "metadata": {
+        "order": "true",
+        "zeal": "true",
+        "cooldown": "4"
+      }
+    },
+    {
+      "id": "203284",
+      "name": "薇瑞娜",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 6,
+      "provision": 9,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "categories": [
+        "吸血鬼"
+      ],
+      "effect_ids": [
+        "deploy:supported.verena.deploy",
+        "status_added:supported.verena.bleeding_added"
+      ],
+      "description": "部署：使 1 个敌军单位重伤 4 回合。重伤的敌军单位无法获得增益。",
+      "metadata": {
+        "implementation": "implemented",
+        "python_effect": "deck_a.verena"
+      }
+    },
+    {
+      "id": "200301",
+      "name": "纳吉尔法",
+      "type": "special",
+      "faction": "monsters",
+      "provision": 8,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "categories": [
+        "狂猎"
+      ],
+      "effect_ids": [
+        "special:supported.naglfar.special"
+      ],
+      "description": "检视己方牌组 2 张随机金色牌，随后打出 1 张，将其余卡牌置于牌组顶部。",
+      "metadata": {
+        "implementation": "implemented",
+        "python_effect": "deck_a.naglfar"
+      }
+    },
+    {
+      "id": "201781",
+      "name": "伊勒瑞斯",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 3,
+      "provision": 8,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "categories": [
+        "精灵",
+        "狂猎",
+        "战士"
+      ],
+      "effect_ids": [
+        "deploy:supported.imlerith.deploy"
+      ],
+      "description": "部署（近战）：抽 1 张牌，随后丢弃 1 张牌。若丢弃掉的牌为单位牌，则自身获得其战力的增益。",
+      "metadata": {
+        "implementation": "implemented",
+        "python_effect": "deck_a.imlerith",
+        "deploy_rows": "melee"
+      }
+    },
+    {
+      "id": "131102",
+      "name": "盖尔",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 2,
+      "provision": 8,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "categories": [
+        "精灵",
+        "狂猎"
+      ],
+      "effect_ids": [
+        "deploy:supported.geels.deploy"
+      ],
+      "description": "部署：从牌组中打出 1 张狂猎特殊牌。赤诚：改为从牌组中打出 1 张狂猎牌。",
+      "metadata": {
+        "implementation": "implemented",
+        "python_effect": "deck_a.geels"
+      }
+    },
+    {
+      "id": "201698",
+      "name": "欧兹瑞尔",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 1,
+      "provision": 8,
+      "color": "Gold",
+      "rarity": "Epic",
+      "categories": [
+        "食腐生物"
+      ],
+      "effect_ids": [
+        "deploy:supported.ozzrel.deploy"
+      ],
+      "description": "部署（近战）：吞噬对方墓场中的 1 个单位。部署（远程）：吞噬己方墓场中的 1 个单位。",
+      "metadata": {
+        "implementation": "implemented",
+        "python_effect": "deck_a.ozzrel"
+      }
+    },
+    {
+      "id": "202221",
+      "name": "夜之女王",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 6,
+      "provision": 6,
+      "color": "Gold",
+      "rarity": "Epic",
+      "categories": [
+        "吸血鬼"
+      ],
+      "effect_ids": [
+        "deploy:supported.queen_of_the_night.deploy"
+      ],
+      "description": "部署（近战）：使 1 名敌军单位重伤 3 回合。部署（远程）：净化 1 个单位。"
+    },
+    {
+      "id": "202229",
+      "name": "蝠翼魔",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 4,
+      "provision": 6,
+      "color": "Bronze",
+      "rarity": "Rare",
+      "categories": [
+        "吸血鬼"
+      ],
+      "effect_ids": [
+        "deploy:supported.fleder.deploy"
+      ],
+      "description": "当敌军单位遭受重伤，自身获得所施加重伤回合数的增益。倒数：1。己方回合开始时倒数刷新。",
+      "metadata": {
+        "countdown": "1"
+      }
+    },
+    {
+      "id": "202233",
+      "name": "夜行吸血鬼",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 5,
+      "provision": 5,
+      "color": "Bronze",
+      "rarity": "Rare",
+      "categories": [
+        "吸血鬼"
+      ],
+      "effect_ids": [
+        "deploy:supported.garkain.deploy",
+        "order:supported.garkain.order"
+      ],
+      "description": "狂热。指令（近战）：使 1 个敌军单位重伤 2 回合。冷却：2。己方每打出 1 张吸血鬼牌，则冷却 -1。",
+      "metadata": {
+        "order": "true",
+        "zeal": "true",
+        "cooldown": "2",
+        "order_rows": "melee",
+        "order_target_selector": "enemy_unit"
+      }
+    },
+    {
+      "id": "202230",
+      "name": "吸血鬼女",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 4,
+      "provision": 5,
+      "color": "Bronze",
+      "rarity": "Common",
+      "categories": [
+        "吸血鬼"
+      ],
+      "effect_ids": [
+        "deploy:supported.bruxa.deploy",
+        "order:supported.bruxa.order"
+      ],
+      "description": "部署：使 1 名敌军单位重伤 3 回合。指令：使 1 名敌军单位重伤 3 回合。",
+      "metadata": {
+        "order": "true",
+        "order_target_selector": "enemy_unit"
+      }
+    },
+    {
+      "id": "202228",
+      "name": "猩红盛宴",
+      "type": "special",
+      "faction": "monsters",
+      "provision": 4,
+      "color": "Bronze",
+      "rarity": "Common",
+      "categories": [
+        "生物"
+      ],
+      "effect_ids": [
+        "special:supported.feast_of_blood.special"
+      ],
+      "description": "净化 1 个敌军单位，并对其造成 3 点伤害。若己方控制 1 个吸血鬼，还将使其重伤 3 回合。",
+      "metadata": {
+        "implementation": "implemented",
+        "python_effect": "deck_a.feast_of_blood"
+      }
+    },
+    {
+      "id": "202614",
+      "name": "艾恩·艾尔征服者",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 8,
+      "provision": 4,
+      "color": "Bronze",
+      "rarity": "Common",
+      "categories": [
+        "精灵",
+        "狂猎"
+      ],
+      "effect_ids": [
+        "deploy:supported.aen_elle_conqueror.deploy"
+      ],
+      "description": "遮蔽。部署：摧毁自身。赤诚：取消部署能力。",
+      "metadata": {
+        "veil": "true"
+      }
+    },
+    {
+      "id": "202231",
+      "name": "渴血鸟怪",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 5,
+      "provision": 4,
+      "color": "Bronze",
+      "rarity": "Common",
+      "categories": [
+        "吸血鬼"
+      ],
+      "effect_ids": [
+        "deploy:supported.bloodscented_predator.deploy"
+      ],
+      "description": "部署：使 1 个敌军单位重伤 2 回合。会师：改为使 1 个敌军单位重伤，回合数等同于其基础战力。"
+    },
+    {
+      "id": "200026",
+      "name": "狂猎导航员",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 3,
+      "provision": 4,
+      "color": "Bronze",
+      "rarity": "Common",
+      "categories": [
+        "精灵",
+        "狂猎",
+        "法师"
+      ],
+      "effect_ids": [
+        "deploy:supported.wild_hunt_navigator.deploy"
+      ],
+      "description": "部署：使 1 个友军单位获得增益，增益值等同于其所在排对应的敌方排上霜的持续回合数。统御：改为等同于敌方半场霜的总持续回合数。"
+    },
+    {
+      "id": "132309",
+      "name": "狂猎战士",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 3,
+      "provision": 4,
+      "color": "Bronze",
+      "rarity": "Common",
+      "categories": [
+        "精灵",
+        "狂猎",
+        "战士"
+      ],
+      "effect_ids": [
+        "deploy:supported.wild_hunt_warrior.deploy"
+      ],
+      "description": "部署：对 1 个敌军单位造成 2 点伤害。统御：还会在此单位同排生成霜，持续 1 回合。"
+    },
+    {
+      "id": "132310",
+      "name": "狂猎骑士",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 4,
+      "provision": 4,
+      "color": "Bronze",
+      "rarity": "Rare",
+      "categories": [
+        "精灵",
+        "狂猎",
+        "战士"
+      ],
+      "effect_ids": [
+        "deploy:supported.wild_hunt_rider.deploy"
+      ],
+      "description": "部署、统御：从己方牌组召唤所有自身的同名牌至同排。"
+    },
+    {
+      "id": "132402",
+      "name": "狂猎之犬",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 4,
+      "provision": 4,
+      "color": "Bronze",
+      "rarity": "Common",
+      "categories": [
+        "野兽",
+        "狂猎"
+      ],
+      "effect_ids": [
+        "turn_end:supported.wild_hunt_hound.turn_end"
+      ],
+      "description": "统御：己方回合结束时，自身获得 1 点增益。"
+    },
+    {
+      "id": "202611",
+      "name": "狂猎碾压者",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 5,
+      "armor": 1,
+      "provision": 5,
+      "color": "Bronze",
+      "rarity": "Rare",
+      "categories": [
+        "精灵",
+        "狂猎"
+      ],
+      "effect_ids": [
+        "deploy:supported.wild_hunt_bruiser.deploy"
+      ],
+      "description": "部署：将 1 个敌军单位移至所在半场的另一排。若所移至排上有霜，则对其造成 2 点伤害。"
+    },
+    {
+      "id": "202612",
+      "name": "纳吉尔法船员",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 1,
+      "armor": 1,
+      "provision": 5,
+      "color": "Bronze",
+      "rarity": "Rare",
+      "categories": [
+        "精灵",
+        "狂猎"
+      ],
+      "effect_ids": [
+        "deploy:supported.naglfar_crew.deploy",
+        "turn_end:supported.naglfar_crew.turn_end"
+      ],
+      "description": "部署：生成霜至敌方单排，持续 2 回合。己方回合结束时，若敌方同排上有霜，则自身获得 1 点增益。"
+    },
+    {
+      "id": "202613",
+      "name": "纳吉尔法工头",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 5,
+      "provision": 4,
+      "color": "Bronze",
+      "rarity": "Common",
+      "categories": [
+        "精灵",
+        "狂猎"
+      ],
+      "effect_ids": [
+        "deploy:supported.naglfar_taskmaster.deploy"
+      ],
+      "description": "部署：净化 1 个敌军单位。统御：改为净化 1 个单位。"
+    },
+    {
+      "id": "203160",
+      "name": "艾恩·艾尔贵族",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 4,
+      "provision": 5,
+      "color": "Bronze",
+      "rarity": "Rare",
+      "categories": [
+        "精灵",
+        "狂猎",
+        "望族"
+      ],
+      "effect_ids": [
+        "order:supported.aen_elle_aristocrat.order",
+        "turn_end:supported.aen_elle_aristocrat.turn_end"
+      ],
+      "description": "指令、统御：将 1 个敌军单位移至对方另一排。己方回合结束时，若对方任意一排在本回合内被施加过霜，则生成霜至该排，持续 1 回合。",
+      "metadata": {
+        "order": "true",
+        "order_charges": "1",
+        "order_requires_dominance": "true"
+      }
+    },
+    {
+      "id": "203161",
+      "name": "艾恩·艾尔奴隶商",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 4,
+      "provision": 5,
+      "color": "Bronze",
+      "rarity": "Common",
+      "categories": [
+        "精灵",
+        "狂猎"
+      ],
+      "effect_ids": [
+        "deploy:supported.aen_elle_slave_trader.deploy"
+      ],
+      "description": "部署：获得活力，数值等同于敌方半场霜的总持续回合数，并灌注 1 个敌军单位：其己方回合结束时，若存在战力高于自身的敌方艾恩·艾尔奴隶商，则将自身战力设为 1，随后锁定自身。"
+    },
+    {
+      "id": "202603",
+      "name": "奥贝伦王",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 6,
+      "provision": 12,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "categories": [
+        "精灵",
+        "狂猎"
+      ],
+      "effect_ids": [
+        "deploy:supported.oberon_king.deploy",
+        "round_start:supported.oberon_king.round_start"
+      ],
+      "description": "部署：生成并随机打出1张铜色狂猎单位牌。小局开始时，若位于手牌或牌组，发生历变。"
+    },
+    {
+      "id": "202604",
+      "name": "奥贝伦王：入侵者",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 6,
+      "provision": 12,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "categories": [
+        "精灵",
+        "狂猎"
+      ],
+      "effect_ids": [
+        "deploy:supported.oberon_invader.deploy",
+        "round_start:supported.oberon_invader.round_start"
+      ],
+      "description": "部署：创造并打出1张铜色狂猎单位牌。赤诚：小局开始时，若位于手牌或牌组，发生历变。",
+      "metadata": {
+        "derived_evolution_form": "true"
+      }
+    },
+    {
+      "id": "202605",
+      "name": "奥贝伦王：征服者",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 6,
+      "provision": 12,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "categories": [
+        "精灵",
+        "狂猎"
+      ],
+      "effect_ids": [
+        "deploy:supported.oberon_conqueror.deploy",
+        "card_played:supported.oberon_conqueror.card_played"
+      ],
+      "description": "遮蔽。部署：从初始牌组生成并打出1张铜色狂猎单位牌。每当己方打出狂猎单位，使其获得1点增益。",
+      "metadata": {
+        "derived_evolution_form": "true",
+        "veil": "true"
+      }
+    },
+    {
+      "id": "200055",
+      "name": "白霜降临",
+      "type": "leader",
+      "faction": "monsters",
+      "provision": 15,
+      "color": "Leader",
+      "rarity": "Legendary",
+      "categories": [
+        "领袖牌"
+      ],
+      "effect_ids": [
+        "leader:supported.white_frost.leader",
+        "card_played:supported.white_frost.card_played"
+      ],
+      "description": "指令：将1个敌军单位移至另一排，并在目标排生成霜2回合。充能：2。己方打出狂猎单位时，若敌方对应排有霜，使其增益1。",
+      "metadata": {
+        "leader": "true",
+        "order": "true",
+        "charges": "2",
+        "provision_bonus": "15",
+        "requires_target": "enemy_unit",
+        "leader_target_selector": "enemy_unit"
+      }
+    },
+    {
+      "id": "202493",
+      "name": "水晶面甲",
+      "type": "stratagem",
+      "faction": "neutral",
+      "provision": 0,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "effect_ids": [
+        "order:supported.crystal_skull.order"
+      ],
+      "description": "指令：使1个友军单位获得4点增益和遮蔽。",
+      "metadata": {
+        "stratagem": "true",
+        "order": "true",
+        "zeal": "true",
+        "order_charges": "1",
+        "order_target_selector": "allied_unit"
+      }
+    },
+    {
+      "id": "132102",
+      "name": "伊勒瑞斯之怒",
+      "type": "special",
+      "faction": "monsters",
+      "provision": 8,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "categories": [
+        "狂猎"
+      ],
+      "effect_ids": [
+        "special:supported.imleriths_wrath.special"
+      ],
+      "description": "对1个敌军单位造成等同于己方最强单位战力的伤害；若目标排有霜则改为摧毁。"
+    },
+    {
+      "id": "202609",
+      "name": "蜜蜂幽灵",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 4,
+      "armor": 1,
+      "provision": 7,
+      "color": "Gold",
+      "rarity": "Epic",
+      "categories": [
+        "野兽",
+        "狂猎"
+      ],
+      "effect_ids": [
+        "order:supported.apiarian_phantom.order",
+        "turn_end:supported.apiarian_phantom.turn_end"
+      ],
+      "description": "遮蔽。狂热。指令（近战）：对1个敌军单位造成3点伤害。己方回合结束时，若指令尚未使用，自身增益1。",
+      "metadata": {
+        "veil": "true",
+        "zeal": "true",
+        "order": "true",
+        "order_charges": "1",
+        "order_rows": "melee",
+        "order_target_selector": "enemy_unit"
+      }
+    },
+    {
+      "id": "202606",
+      "name": "艾瑞汀‧布里克‧葛拉斯",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 7,
+      "provision": 9,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "categories": [
+        "精灵",
+        "狂猎"
+      ],
+      "effect_ids": [
+        "deploy:supported.eredin.deploy"
+      ],
+      "description": "部署：生成霜至对方单排，持续2回合。统御：霜造成的伤害提高1点。",
+      "metadata": {
+        "frost_damage_bonus_dominance": "1"
+      }
+    },
+    {
+      "id": "202608",
+      "name": "冬之女王",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 3,
+      "provision": 8,
+      "color": "Gold",
+      "rarity": "Epic",
+      "categories": [
+        "精灵",
+        "狂猎"
+      ],
+      "effect_ids": [
+        "turn_end:supported.winter_queen.turn_end",
+        "round_end:supported.winter_queen.round_end"
+      ],
+      "description": "己方回合结束时，若对方两排均有霜，则从牌组召唤至远程排。赤诚：双方放弃跟牌后，增益等同于对方霜剩余回合数的2倍。"
+    },
+    {
+      "id": "202610",
+      "name": "红骑士",
+      "type": "special",
+      "faction": "monsters",
+      "provision": 5,
+      "color": "Bronze",
+      "rarity": "Rare",
+      "categories": [
+        "狂猎"
+      ],
+      "effect_ids": [
+        "special:supported.red_riders.special"
+      ],
+      "description": "择一：单排霜4；单排霜2并重新打出1个铜色狂猎单位；或两排各霜2。"
+    },
+    {
+      "id": "202703",
+      "name": "红骑士：严霜",
+      "type": "special",
+      "faction": "monsters",
+      "provision": 0,
+      "color": "Token",
+      "rarity": "Token",
+      "is_token": true,
+      "doomed": true,
+      "description": "在对方单排生成霜4回合。",
+      "metadata": {
+        "derived_choice_form": "true"
+      }
+    },
+    {
+      "id": "202704",
+      "name": "红骑士：重整",
+      "type": "special",
+      "faction": "monsters",
+      "provision": 0,
+      "color": "Token",
+      "rarity": "Token",
+      "is_token": true,
+      "doomed": true,
+      "description": "在对方单排生成霜2回合，随后重新打出铜色狂猎单位。",
+      "metadata": {
+        "derived_choice_form": "true"
+      }
+    },
+    {
+      "id": "203125",
+      "name": "红骑士：双霜",
+      "type": "special",
+      "faction": "monsters",
+      "provision": 0,
+      "color": "Token",
+      "rarity": "Token",
+      "is_token": true,
+      "doomed": true,
+      "description": "在对方两排各生成霜2回合。",
+      "metadata": {
+        "derived_choice_form": "true"
+      }
+    },
+    {
+      "id": "132302",
+      "name": "远古小雾妖",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 4,
+      "provision": 6,
+      "color": "Bronze",
+      "rarity": "Rare",
+      "categories": [
+        "食腐生物"
+      ],
+      "effect_ids": [
+        "deploy:supported.ancient_foglet.deploy"
+      ],
+      "description": "遮蔽。部署：增益等同于敌方所有整排效果的总剩余回合数。己方每施加整排效果时，增益相同回合数。",
+      "metadata": {
+        "veil": "true",
+        "boost_on_row_effect_applied": "true"
+      }
+    },
+    {
+      "id": "203159",
+      "name": "卡兰希尔：金童",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 1,
+      "provision": 9,
+      "color": "Gold",
+      "rarity": "Epic",
+      "categories": [
+        "精灵",
+        "狂猎",
+        "法师"
+      ],
+      "effect_ids": [
+        "turn_start:supported.caranthir_golden_child.turn_start"
+      ],
+      "description": "己方回合开始时，若位于手牌或牌组中，重置自身战力并获得等同于之前5个敌方回合中霜实际造成战力伤害量的增益。",
+      "metadata": {
+        "tracks_frost_damage_history": "true"
+      }
+    },
+    {
+      "id": "203158",
+      "name": "提尔纳丽雅",
+      "type": "artifact",
+      "faction": "monsters",
+      "provision": 12,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "categories": [
+        "地点",
+        "狂猎"
+      ],
+      "effect_ids": [
+        "deploy:supported.tir_na_lia.deploy",
+        "order:supported.tir_na_lia.order",
+        "round_end:supported.tir_na_lia.round_end"
+      ],
+      "description": "坚韧。部署：按初始牌组中不同铜色狂猎牌数量增益一个友军单位；无其他友军时跳过。指令：生成并打出红骑士。赤诚：使用指令时，先在敌方两排恢复上一小局转换时失去的剩余霜。",
+      "metadata": {
+        "resilience": "true",
+        "order": "true",
+        "order_charges": "1",
+        "deploy_target_selector": "allied_unit_optional",
+        "saved_frost_memory": "true"
+      }
+    },
+    {
+      "id": "202607",
+      "name": "诸界之门",
+      "type": "special",
+      "faction": "monsters",
+      "provision": 8,
+      "color": "Gold",
+      "rarity": "Legendary",
+      "categories": [
+        "狂猎"
+      ],
+      "effect_ids": [
+        "special:supported.ard_gaeth.special"
+      ],
+      "description": "回响。在对方近战排和远程排各生成霜，持续3回合。",
+      "metadata": {
+        "echo": "true"
+      }
+    },
+    {
+      "id": "132313",
+      "name": "蝙魔",
+      "type": "unit",
+      "faction": "monsters",
+      "power": 3,
+      "is_token": true,
+      "doomed": true,
+      "provision": 0,
+      "color": "Token",
+      "rarity": "Token",
+      "categories": [
+        "吸血鬼"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+# Shared Python/C++ semantic trace: unit play advances to opponent, then opponent passes.
+play_hand p=0 h=0 row=melee side=self
+pass p=1

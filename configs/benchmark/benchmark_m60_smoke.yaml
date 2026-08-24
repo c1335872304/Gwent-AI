@@ -1,0 +1,22 @@
+seed: 0
+collector:
+  num_envs: 16
+  max_batch_size: 16
+  reward_mode: terminal
+model:
+  hidden_dim: 32
+  num_attention_heads: 4
+  attention_layers: 1
+  text_embedding_mode: none
+  text_embedding_dim: 32
+  use_candidate_object_attention: true
+  use_candidate_self_attention: true
+ppo:
+  updates: 1
+  steps_per_update: 64
+  epochs: 1
+  minibatch_size: 32
+eval:
+  interval: 1
+  rounds: 8
+  num_envs: 8

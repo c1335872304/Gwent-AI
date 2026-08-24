@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gwent-rl"
+version = "0.1.0"
+description = "Python ctypes wrapper for gwent-cpp-core RL collector"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "gwent-cpp-core contributors"}]
+dependencies = [
+    "numpy>=1.23",
+    "tomli; python_version < '3.11'",
+]
+
+[project.optional-dependencies]
+torch = ["torch"]
+dev = ["pytest>=7"]
+qwen = ["dashscope>=1.19"]
+
+[project.urls]
+Repository = "https://example.invalid/gwent-cpp-core"
+
+[project.scripts]
+gwent-rl-random-demo = "gwent_rl.random_policy_demo:main"
+gwent-rl-torch-demo = "gwent_rl.torch_policy_demo:main"
+gwent-rl-train = "gwent_rl.train_ppo:main"
+gwent-rl-train-ppo-demo = "gwent_rl.train_ppo_demo:main"
+gwent-rl-training-task = "gwent_rl.training.cli:main"
+gwent-rl-benchmark = "gwent_rl.benchmark_collector:main"
+gwent-rl-eval = "gwent_rl.eval_policy:main"
+gwent-rl-matchup = "gwent_rl.eval_matchup:main"
+gwent-rl-hash-embeddings = "gwent_rl.text_embeddings:main"
+gwent-rl-replay-debug = "gwent_rl.replay_debug:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

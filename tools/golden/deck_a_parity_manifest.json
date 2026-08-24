@@ -1,0 +1,521 @@
+{
+  "schema_version": "deck-a-cpp-parity-v1",
+  "based_on_cpp_milestone": "m30_final_parity_closure",
+  "generated_in_milestone": "m31_final_gap_closure",
+  "summary": {
+    "verdict": "near_equivalent_with_documented_cpp_first_rule_gap",
+    "cpp_core_status": "deck_a_core_final_gap_closure",
+    "blocking_reason": "No remaining manifest-level card gaps after m31. All non-token Deck A cards are parity_checked under the current semantic trace, normalized LegalActions, and C++ unit-test audit suite. This is still an executable audit verdict rather than a formal proof over every possible game state.",
+    "card_status_counts": {
+      "partial": 0,
+      "parity_checked": 21,
+      "data_only": 0,
+      "implemented_unchecked": 0,
+      "token_data": 1
+    },
+    "legal_actions_parity": "14 / 14 normalized LegalActions cases pass",
+    "semantic_parity": "27 / 27 semantic cases pass under documented compare ignores"
+  },
+  "status_legend": {
+    "parity_checked": "At least one Python/C++ semantic trace covers the current C++ behavior and passes under the documented compare key set.",
+    "implemented_unchecked": "C++ has an implementation, but there is not yet a dedicated passing Python/C++ trace for the full card behavior.",
+    "partial": "C++ implements a useful subset but is known to omit one or more Python behaviors.",
+    "data_only": "C++ catalog has card data but no functional effect implementation yet.",
+    "token_data": "Token/data card with no standalone effect requirement."
+  },
+  "cards": [
+    {
+      "card_id": "202185",
+      "name": "腥膻之味",
+      "kind": "leader",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.blood_scent",
+      "cpp_notes": "m30: dedicated semantic trace deck_a_semantic_blood_scent_leader covers leader bleeding target and charge usage; final Ekimmara random-row spawn remains covered by C++ unit tests. Legal surface still has documented post-leader pass/end-turn representation gap."
+    },
+    {
+      "card_id": "202497",
+      "name": "注魔盔甲",
+      "kind": "stratagem",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.armorer_workshop",
+      "cpp_notes": "Boost+armor on hand unit exists; order now waits for explicit end_turn before consuming the stratagem, matching Python semantic trace."
+    },
+    {
+      "card_id": "203099",
+      "name": "雷吉斯：重生",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.regis_reborn",
+      "cpp_notes": "Deploy drain and hand/deck turn-end base-power growth are implemented and covered by the former bruxa pending Regis semantic case."
+    },
+    {
+      "card_id": "202889",
+      "name": "暗影长者",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.unseen_elder",
+      "cpp_notes": "m30: dedicated semantic trace deck_a_semantic_elder covers deploy bleeding target and turn transition parity for the current implementation; random turn-end branch is additionally covered by C++ unit tests."
+    },
+    {
+      "card_id": "202437",
+      "name": "巨型蜈蚣",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.giant_centipede",
+      "cpp_notes": "m30: dedicated semantic trace deck_a_semantic_centipede covers deploy armor gain path; armor_broken self-destroy remains covered by C++ unit tests."
+    },
+    {
+      "card_id": "202888",
+      "name": "狄拉夫·艾瑞廷",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.dettlaff_aep",
+      "cpp_notes": "Deploy now requests an enemy-row pending choice and adds Blood Moon to the selected row; order damages a bleeding enemy; deathblow spawns Ekimmara in the same row; Blood Moon turn-start tick is implemented. Covered by dedicated row-choice semantic trace plus C++ unit tests."
+    },
+    {
+      "card_id": "203265",
+      "name": "裂流之主",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.lord_riptide",
+      "cpp_notes": "m30: dedicated semantic trace deck_a_semantic_riptide_melee covers melee deploy clash path and legal deploy-row parity after m29; hand armor branch remains covered by C++ unit tests."
+    },
+    {
+      "card_id": "132220",
+      "name": "卡塔卡恩",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.katakan",
+      "cpp_notes": "m31: dedicated semantic trace deck_a_semantic_katakan_order covers same-row order spawn flow after a pass back to the Katakan controller. C++ unit tests also cover bleeding-added cooldown reduction."
+    },
+    {
+      "card_id": "203284",
+      "name": "薇瑞娜",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.verena",
+      "cpp_notes": "m30: dedicated semantic trace deck_a_semantic_verena covers deploy bleeding and boost-block listener installation for current behavior; boost-block enforcement remains covered by C++ unit tests."
+    },
+    {
+      "card_id": "200301",
+      "name": "纳吉尔法",
+      "kind": "special",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.naglfar",
+      "cpp_notes": "M26/M27: randomly reveals/stores two gold deck candidates, supports named candidate selection in semantic traces, puts the unchosen card on deck top, finishes Naglfar, and if the chosen card is a unit asks for an explicit own-row placement before playing it. Covered by deck_a_semantic_naglfar_named_deck_choice."
+    },
+    {
+      "card_id": "201781",
+      "name": "伊勒瑞斯",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.imlerith",
+      "cpp_notes": "m30: dedicated semantic trace deck_a_semantic_imlerith_melee_discard covers melee deploy draw/discard/boost flow. C++ pending discard candidates were fixed to expose all hand cards, matching Python legal surface."
+    },
+    {
+      "card_id": "131102",
+      "name": "盖尔",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.geels",
+      "cpp_notes": "M27: candidate filtering is implemented; selected special plays directly, selected unit asks for explicit own-row placement before being played. Covered by deck_a_semantic_geels_named_deck_choice with seed=2."
+    },
+    {
+      "card_id": "201698",
+      "name": "欧兹瑞尔",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.ozzrel",
+      "cpp_notes": "m31: dedicated semantic traces cover both deploy branches: ranged consumes own cemetery unit and melee consumes enemy cemetery unit. Cemetery consume banishes the consumed unit and boosts Ozzrel by that unit current power."
+    },
+    {
+      "card_id": "202221",
+      "name": "夜之女王",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.queen_of_the_night",
+      "cpp_notes": "m30: dedicated semantic trace deck_a_semantic_queen_melee covers melee deploy bleeding branch. Ranged purify branch still has C++ unit coverage but not a dedicated semantic trace."
+    },
+    {
+      "card_id": "202229",
+      "name": "蝠翼魔",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.fleder",
+      "cpp_notes": "Bleeding-added boost/countdown behavior now matches Python in the dedicated trace; countdown is effect-local and not a generic turn counter."
+    },
+    {
+      "card_id": "202233",
+      "name": "夜行吸血鬼",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.garkain",
+      "cpp_notes": "m30: dedicated semantic trace deck_a_semantic_garkain_order covers order bleeding path; melee-only order restriction and cooldown paths remain covered by C++ and legal-surface audits. Legal surface still has documented post-order pass/end-turn representation gap."
+    },
+    {
+      "card_id": "202230",
+      "name": "吸血鬼女",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.bruxa",
+      "cpp_notes": "Deploy pending target and bleeding are covered by the Regis and Fleder semantic cases; order still needs a dedicated case."
+    },
+    {
+      "card_id": "202228",
+      "name": "猩红盛宴",
+      "kind": "special",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.feast_of_blood",
+      "cpp_notes": "Special implementation exists and parity case covers explicit pending target: purify enemy unit, damage 3, and apply bleeding 3 when the controller has a friendly Vampire."
+    },
+    {
+      "card_id": "202614",
+      "name": "艾恩·艾尔征服者",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.aen_elle_conqueror",
+      "cpp_notes": "m31: dedicated semantic trace deck_a_semantic_conqueror_veil covers Veil status parity against Blood Scent. C++ unit tests also verify Veil blocks status application until purify removes it."
+    },
+    {
+      "card_id": "202231",
+      "name": "渴血鸟怪",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.bloodscented_predator",
+      "cpp_notes": "m31: dedicated semantic trace deck_a_semantic_bloodscented_predator covers deploy pending target and bleeding application. C++ unit tests cover bonded branch using target base power."
+    },
+    {
+      "card_id": "132310",
+      "name": "狂猎骑士",
+      "kind": "unit",
+      "cpp_status": "parity_checked",
+      "python_binding": "deck_a.wild_hunt_rider",
+      "cpp_notes": "m31: dedicated semantic trace deck_a_semantic_wild_hunt_rider covers dominance summon from deck to same row. C++ unit tests also verify each matching deck copy is summoned exactly once and the duplicate-move bug is fixed."
+    },
+    {
+      "card_id": "132313",
+      "name": "蝙魔",
+      "kind": "token",
+      "cpp_status": "token_data",
+      "python_binding": "token.ekimmara",
+      "cpp_notes": "Token data exists and can be spawned."
+    }
+  ],
+  "semantic_cases": [
+    {
+      "name": "deck_a_semantic_pass_pair",
+      "expectation": "pass",
+      "coverage": "round transition after both players pass"
+    },
+    {
+      "name": "deck_a_semantic_unit_play",
+      "expectation": "pass",
+      "coverage": "first shuffled Deck A hand unit play"
+    },
+    {
+      "name": "deck_a_semantic_unit_then_pass",
+      "expectation": "pass",
+      "coverage": "unit play then opponent pass"
+    },
+    {
+      "name": "deck_a_semantic_special_no_target",
+      "expectation": "pass",
+      "coverage": "true special card with no legal target"
+    },
+    {
+      "name": "deck_a_semantic_stratagem_order_fixed",
+      "expectation": "mismatch",
+      "coverage": "C++-first correction: stratagem order resolves and removes the stratagem immediately; Python oracle still keeps it until explicit end_turn.",
+      "accepted_gap": "python_oracle_outdated_stratagem_consumption_timing"
+    },
+    {
+      "name": "deck_a_semantic_bruxa_pending_regis_fixed",
+      "expectation": "pass",
+      "coverage": "explicit pending target replay plus Regis hand/deck turn-end growth"
+    },
+    {
+      "name": "deck_a_semantic_fleder_countdown_fixed",
+      "expectation": "pass",
+      "coverage": "Fleder countdown is not decremented by generic turn counter; it is consumed only by the bleeding-added listener.",
+      "manual_pending": true
+    },
+    {
+      "name": "deck_a_semantic_feast_of_blood_fixed",
+      "expectation": "pass",
+      "coverage": "Feast of Blood explicit pending target purifies, damages, and conditionally applies bleeding when a friendly Vampire exists.",
+      "manual_pending": true
+    },
+    {
+      "name": "deck_a_semantic_dettlaff_row_choice_fixed",
+      "expectation": "pass",
+      "coverage": "Dettlaff deploy requests an enemy row target and applies Blood Moon to the explicitly chosen row before ending the turn.",
+      "manual_pending": true
+    },
+    {
+      "name": "deck_a_semantic_named_hand_play",
+      "expectation": "pass",
+      "coverage": "m26 card_id selector for stable hand-card play traces"
+    },
+    {
+      "name": "deck_a_semantic_naglfar_named_deck_choice",
+      "expectation": "pass",
+      "coverage": "Naglfar nested deck-play uses named revealed candidate selection plus explicit row choice",
+      "manual_pending": true
+    },
+    {
+      "name": "deck_a_semantic_geels_named_deck_choice",
+      "expectation": "pass",
+      "coverage": "Geels devotion nested deck-play uses named Wild Hunt Rider selection from deck plus explicit row choice.",
+      "manual_pending": true,
+      "seed": 2,
+      "starting_player": 0
+    },
+    {
+      "name": "deck_a_semantic_blood_scent_leader_fixed",
+      "expectation": "pass",
+      "coverage": "Blood Scent leader use creates/resolves an explicit enemy-unit pending target without automatically ending the turn.",
+      "manual_pending": true
+    },
+    {
+      "name": "deck_a_semantic_garkain_order_cooldown_fixed",
+      "expectation": "pass",
+      "coverage": "Garkain order starts cooldown immediately, then resolves pending enemy bleeding target.",
+      "manual_pending": true
+    },
+    {
+      "name": "deck_a_semantic_queen_melee_deploy_fixed",
+      "expectation": "pass",
+      "coverage": "Queen of the Night melee deploy requests enemy target and applies bleeding.",
+      "manual_pending": true,
+      "seed": 2,
+      "starting_player": 0
+    },
+    {
+      "name": "deck_a_semantic_queen_ranged_purify_fixed",
+      "expectation": "pass",
+      "coverage": "Queen of the Night ranged deploy can target and purify any battlefield unit.",
+      "manual_pending": true,
+      "seed": 2,
+      "starting_player": 0
+    },
+    {
+      "name": "deck_a_semantic_imlerith_melee_discard_fixed",
+      "expectation": "pass",
+      "coverage": "Imlerith melee deploy draws, asks for a discard target, discards that unit, and boosts itself by discarded current power.",
+      "manual_pending": true,
+      "seed": 8,
+      "starting_player": 0
+    },
+    {
+      "name": "deck_a_semantic_riptide_melee_clash_fixed",
+      "expectation": "pass",
+      "coverage": "Lord Riptide melee clash with strongest enemy; destroyed enemy enters cemetery with clamped non-negative power.",
+      "seed": 1,
+      "starting_player": 0
+    },
+    {
+      "name": "deck_a_semantic_centipede",
+      "expectation": "pass",
+      "coverage": "Giant Centipede deploy armor gain from remaining hand count.",
+      "seed": 3,
+      "starting_player": 0
+    },
+    {
+      "name": "deck_a_semantic_verena",
+      "expectation": "pass",
+      "coverage": "Verena deploy bleeding and boost-block marker on selected enemy.",
+      "manual_pending": true,
+      "seed": 1,
+      "starting_player": 0
+    },
+    {
+      "name": "deck_a_semantic_elder",
+      "expectation": "pass",
+      "coverage": "Unseen Elder deploy bleeding target selection.",
+      "manual_pending": true,
+      "seed": 1,
+      "starting_player": 0
+    },
+    {
+      "name": "deck_a_semantic_conqueror_veil",
+      "expectation": "pass",
+      "coverage": "Aen Elle Conqueror Veil remains in status surface and blocks Blood Scent bleeding while still being a valid target.",
+      "seed": 2,
+      "starting_player": 0
+    },
+    {
+      "name": "deck_a_semantic_katakan_order",
+      "expectation": "pass",
+      "coverage": "Katakan order after opponent pass spawns Ekimmara on the same row and preserves order/end-turn parity.",
+      "seed": 3,
+      "starting_player": 0
+    },
+    {
+      "name": "deck_a_semantic_bloodscented_predator",
+      "expectation": "pass",
+      "coverage": "Bloodscented Predator deploy uses explicit enemy-unit pending target and applies bleeding.",
+      "manual_pending": true,
+      "seed": 2,
+      "starting_player": 0
+    },
+    {
+      "name": "deck_a_semantic_wild_hunt_rider",
+      "expectation": "pass",
+      "coverage": "Wild Hunt Rider dominance deploy summons matching deck copy to the same row.",
+      "seed": 2,
+      "starting_player": 0
+    },
+    {
+      "name": "deck_a_semantic_ozzrel_ranged_own_cemetery",
+      "expectation": "pass",
+      "coverage": "Ozzrel ranged deploy consumes an own cemetery unit and banishes it while boosting Ozzrel.",
+      "manual_pending": true,
+      "seed": 4,
+      "starting_player": 0
+    },
+    {
+      "name": "deck_a_semantic_ozzrel_melee_enemy_cemetery",
+      "expectation": "pass",
+      "coverage": "Ozzrel melee deploy consumes an enemy cemetery unit and banishes it while boosting Ozzrel.",
+      "manual_pending": true,
+      "seed": 8,
+      "starting_player": 0
+    }
+  ],
+  "cpp_unit_audit_cases": [
+    {
+      "name": "ozzrel_melee_consumes_enemy_cemetery_unit",
+      "coverage": "Ozzrel melee cemetery consume: enemy cemetery unit is banished and Ozzrel boosts by its power."
+    },
+    {
+      "name": "ozzrel_ranged_consumes_own_cemetery_unit",
+      "coverage": "Ozzrel ranged cemetery consume: own cemetery unit is banished and Ozzrel boosts by its power."
+    },
+    {
+      "name": "imlerith_melee_draw_discard_boost",
+      "coverage": "Imlerith is melee-only; draws one, prompts discard, discards selected unit and boosts by current power."
+    },
+    {
+      "name": "verena_boost_block",
+      "coverage": "Bleeding enemy unit receives boost_blocked_by Verena memory; primitive boost is blocked while Verena is active/unlocked."
+    },
+    {
+      "name": "unseen_elder_turn_end_partial",
+      "coverage": "Unseen Elder applies turn-end bleeding to a non-bleeding enemy and devotion-ticks existing bleeding enemies."
+    },
+    {
+      "name": "giant_centipede_armor_broken_self_destroy",
+      "coverage": "Damage that reduces Giant Centipede armor from positive to zero dispatches armor_broken and destroys the Centipede."
+    },
+    {
+      "name": "lord_riptide_melee_clash_and_hand_end_armor",
+      "coverage": "Lord Riptide is melee-only, clashes with the strongest enemy, and gains armor from hand on owner turn end."
+    },
+    {
+      "name": "dettlaff_order_deathblow_and_blood_moon_data",
+      "coverage": "Dettlaff damages a bleeding enemy with order, deathblow spawns Ekimmara, and deploy records blood_moon row effect data."
+    },
+    {
+      "name": "bloodscented_predator_bonded_uses_base_power",
+      "coverage": "Bonded Bloodscented Predator applies bleeding equal to the target base power instead of the base 2."
+    },
+    {
+      "name": "naglfar_reveals_two_gold_candidates_and_plays_selected_card",
+      "coverage": "Naglfar requests a two-card gold choice, puts the unselected revealed gold on deck top, moves Naglfar to cemetery, then selected unit deck-play requests explicit row placement before resolving."
+    },
+    {
+      "name": "geels_non_devotion_plays_wild_hunt_special_from_deck",
+      "coverage": "Non-devotion Geels only offers Wild Hunt special deck cards and plays the selected special."
+    },
+    {
+      "name": "geels_devotion_can_play_any_wild_hunt_card_from_deck",
+      "coverage": "Devotion Geels offers any Wild Hunt deck card; a selected Wild Hunt unit stays in deck until an explicit RowTarget choice places and resolves it."
+    },
+    {
+      "name": "blood_moon_turn_start_bleeding_and_duration",
+      "coverage": "Blood Moon triggers on its owner turn start, chooses a unit in the affected row, applies bleeding to non-bleeding units, and decrements duration."
+    },
+    {
+      "name": "blood_moon_turn_start_damage_and_expiry",
+      "coverage": "Blood Moon damages an already-bleeding unit instead of adding bleeding and removes itself when duration reaches zero."
+    },
+    {
+      "name": "unseen_elder_fast_rng_target",
+      "coverage": "Unseen Elder turn-end target selection now uses FastRng among non-bleeding enemy units instead of deterministic board order."
+    },
+    {
+      "name": "blood_scent_fast_rng_final_spawn_row",
+      "coverage": "Blood Scent final charge spawns Ekimmara on a FastRng-selected open allied battle row."
+    },
+    {
+      "name": "setup_rng_state_matches_python_when_starting_player_is_fixed",
+      "coverage": "Fixed starting_player_id no longer consumes one random number through eager value_or fallback evaluation."
+    },
+    {
+      "name": "dettlaff_pending_row_choice",
+      "coverage": "Dettlaff deploy creates a RowTarget pending choice and resolves Blood Moon on the selected enemy row."
+    },
+    {
+      "name": "naglfar_reveal_persisted_across_pending_choice",
+      "coverage": "Naglfar stores the FastRng-revealed gold candidates so the pending resolution uses the original reveal, not a second random sample."
+    },
+    {
+      "name": "from_deck_unit_requires_explicit_row_choice",
+      "coverage": "Generic Deck A deck-play helper now requests a RowTarget pending choice for non-special cards instead of defaulting to own melee."
+    },
+    {
+      "name": "geels_named_nested_deck_play_trace",
+      "coverage": "Python/C++ semantic audit case covers Geels selecting Wild Hunt Rider from deck and choosing ranged row."
+    },
+    {
+      "name": "aen_elle_conqueror_veil_blocks_status_until_purified",
+      "coverage": "Veil blocks bleeding/status application until purify removes it."
+    },
+    {
+      "name": "wild_hunt_rider_summons_each_matching_deck_copy_once",
+      "coverage": "Dominance summon does not duplicate move tasks per matching deck copy."
+    }
+  ],
+  "legal_actions_audit": {
+    "schema_version": "deck-a-legal-actions-audit-manifest-v1",
+    "status": "final_gap_closure_added",
+    "normalized_surface": "Python hierarchical decisions are expanded into atomic play_hand/use_order/use_leader/choose_target/choose_row/end_turn entries before comparison.",
+    "cases": [
+      {
+        "name": "deck_a_semantic_named_hand_play",
+        "expectation": "pass",
+        "coverage": "initial turn and normal hand play legal surface"
+      },
+      {
+        "name": "deck_a_semantic_dettlaff_row_choice_fixed",
+        "expectation": "pass",
+        "coverage": "pending row choice after Dettlaff deploy"
+      },
+      {
+        "name": "deck_a_semantic_naglfar_named_deck_choice",
+        "expectation": "pass",
+        "coverage": "Naglfar nested deck-play card and row legal surfaces"
+      },
+      {
+        "name": "deck_a_semantic_geels_named_deck_choice",
+        "expectation": "mismatch",
+        "coverage": "Geels nested deck-play followed by next-player legal turn surface",
+        "known_reason": "Python extracted core does not enforce C++ deploy_rows for Imlerith/Riptide on the next player surface."
+      },
+      {
+        "name": "deck_a_semantic_bloodscented_predator",
+        "expectation": "pass",
+        "coverage": "Predator pending target legal surface"
+      }
+    ],
+    "summary": "m31 keeps all m30 legal-surface cases passing and adds final-gap semantic cases to the broader audit."
+  },
+  "remaining_gaps": [
+    {
+      "id": "gap_manifest_card_status",
+      "severity": "none",
+      "status": "closed_in_m31",
+      "details": "All non-token Deck A cards are parity_checked in the manifest. Remaining uncertainty is limited to the normal caveat that executable semantic/LegalActions audits are not a formal proof over every possible action permutation."
+    }
+  ]
+}

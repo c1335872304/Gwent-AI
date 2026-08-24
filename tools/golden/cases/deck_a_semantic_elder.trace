@@ -1,0 +1,5 @@
+# m30: Unseen Elder deploy applies bleeding to selected enemy.
+play_hand p=0 h=4 row=melee side=self
+play_hand p=1 h=0 row=melee side=self
+play_hand p=0 cid=202889 row=melee side=self
+choose_target p=0 target=enemy:melee:0

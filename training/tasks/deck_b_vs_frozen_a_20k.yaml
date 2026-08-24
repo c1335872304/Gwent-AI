@@ -1,0 +1,49 @@
+schema_version: 3
+name: deck_b_vs_frozen_a_20k
+status: retired
+description: 历史 learner-vs-frozen Deck B 专项任务；依赖服务器绝对路径 checkpoint，V3 封盘后保留为复现实验记录，不作为可直接运行任务。
+
+algorithm:
+  config: configs/training/ppo_128env_ab_strategic.yaml
+
+initialization:
+  mode: warm_start
+  checkpoint: /home/ly00005757/crk/gwent_runtime/runs/tasks/fair_observation_v1_warmstart_50k/checkpoints/best.pt
+  checkpoint_sha256: 92dc30199940d06d01fd85189d971725a757ed58da2a215015b853156a1739fc
+  source_observation_schema: 13
+  source_action_grammar: 5
+  reset_optimizer: true
+
+training_control:
+  mode: learner_vs_frozen
+  learner_deck: deck_b
+  opponent_deck: deck_a
+  frozen_checkpoint: /home/ly00005757/crk/gwent_runtime/runs/tasks/fair_observation_v1_warmstart_50k/checkpoints/best.pt
+  frozen_checkpoint_sha256: 92dc30199940d06d01fd85189d971725a757ed58da2a215015b853156a1739fc
+  side_schedule: alternate
+
+budget:
+  total_games: 20000
+  games_per_update: 2500
+
+runtime:
+  num_envs: 512
+  max_batch_size: 512
+  minibatch_size: 2048
+  collector_threads: 12
+  device: auto
+
+checkpoint:
+  interval_updates: 2
+
+evaluation:
+  enabled: true
+  every_updates: 2
+  games: 2000
+  num_envs: 128
+  internal_promote_win_rate: 0.55
+
+execution:
+  run_dir: runs/tasks/deck_b_vs_frozen_a_20k
+  library: build-release/libgwent_core.so
+  resume: auto

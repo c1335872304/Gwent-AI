@@ -1,0 +1,4 @@
+# m30: Lord Riptide melee deploy clashes with the strongest enemy and dead units enter cemetery at non-negative power.
+play_hand p=0 h=4 row=melee side=self
+play_hand p=1 h=0 row=melee side=self
+play_hand p=0 cid=203265 row=melee side=self

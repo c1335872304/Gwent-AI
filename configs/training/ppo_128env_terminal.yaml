@@ -1,0 +1,42 @@
+seed: 0
+device: auto
+run_dir: runs/ppo_128env_terminal
+checkpoint_interval: 5
+collector:
+  num_envs: 128
+  max_batch_size: 128
+  base_seed: 0
+  reward_mode: terminal
+  enable_invariants: false
+model:
+  num_attention_heads: 4
+  attention_layers: 1
+  dropout: 0.0
+  text_embedding_mode: npz
+  text_embedding_path: data/embeddings/supported_cards_text_embeddings_qwen1024.npz
+  text_embedding_dim: 1024
+  freeze_text_embeddings: true
+  use_candidate_object_attention: true
+  use_candidate_self_attention: true
+  hidden_dim: 128
+ppo:
+  updates: 100
+  steps_per_update: 2048
+  learning_rate: 0.0003
+  epochs: 3
+  minibatch_size: 512
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_ratio: 0.2
+  value_coef: 0.5
+  entropy_coef: 0.01
+  max_grad_norm: 0.5
+  target_kl: 0.03
+  value_clip: 0.2
+eval:
+  interval: 5
+  games: 256
+  num_envs: 128
+  opponent: random
+  controlled_player: 0
+  deterministic: true

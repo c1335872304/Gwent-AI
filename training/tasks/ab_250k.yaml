@@ -1,0 +1,36 @@
+schema_version: 3
+name: ab_250k
+status: ready
+description: 通用多卡组采样器上的 A/B 共享策略训练；70%交叉对局、15% A镜像、15% B镜像。
+
+algorithm:
+  config: configs/training/ppo_128env_ab_strategic.yaml
+
+initialization:
+  mode: random
+
+budget:
+  total_games: 250000
+  games_per_update: 2500
+
+runtime:
+  num_envs: 512
+  max_batch_size: 512
+  minibatch_size: 2048
+  collector_threads: 24
+  device: auto
+
+checkpoint:
+  interval_updates: 4
+
+evaluation:
+  enabled: true
+  every_updates: 4
+  games: 512
+  num_envs: 128
+  internal_promote_win_rate: 0.55
+
+execution:
+  run_dir: runs/tasks/ab_250k
+  library: build-release/libgwent_core.so
+  resume: auto

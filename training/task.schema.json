@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Gwent Training Task",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "name",
+    "algorithm",
+    "initialization",
+    "budget",
+    "runtime",
+    "execution"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 3
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready",
+        "retired"
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "algorithm": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "config"
+      ],
+      "additionalProperties": false
+    },
+    "compatibility": {
+      "type": "object",
+      "properties": {
+        "observation_schema": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "action_grammar": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "observation_schema",
+        "action_grammar"
+      ],
+      "additionalProperties": false,
+      "description": "可选。缺省时跟随当前 Python 环境 schema/action grammar；只有明确版本钉死的任务才填写。"
+    },
+    "initialization": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "random",
+            "warm_start"
+          ]
+        },
+        "checkpoint": {
+          "type": "string"
+        },
+        "source_observation_schema": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_action_grammar": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reset_optimizer": {
+          "type": "boolean"
+        },
+        "reset_decision_embeddings": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string",
+              "description": "简易 YAML 中可使用逗号分隔名称"
+            }
+          ]
+        },
+        "reset_option_embeddings": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string",
+              "description": "简易 YAML 中可使用逗号分隔名称"
+            }
+          ]
+        },
+        "checkpoint_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Warm-start source 的固定 SHA-256；ready 任务由 Python validator 强制要求。"
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "budget": {
+      "type": "object",
+      "properties": {
+        "total_games": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "games_per_update": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "total_games",
+        "games_per_update"
+      ],
+      "additionalProperties": false
+    },
+    "runtime": {
+      "type": "object"
+    },
+    "checkpoint": {
+      "type": "object"
+    },
+    "evaluation": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "every_updates": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "games": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "num_envs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "internal_promote_win_rate": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      },
+      "required": [
+        "enabled",
+        "every_updates",
+        "games",
+        "num_envs",
+        "internal_promote_win_rate"
+      ],
+      "additionalProperties": false,
+      "description": "内部 current-vs-best 评估。games 表示所有 matchup 合计的完整对局数，由 matchup weight 精确分配。"
+    },
+    "execution": {
+      "type": "object"
+    },
+    "probes": {
+      "type": "object"
+    },
+    "training_control": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "self_play",
+            "learner_vs_frozen"
+          ]
+        },
+        "learner_deck": {
+          "type": "string"
+        },
+        "opponent_deck": {
+          "type": "string"
+        },
+        "frozen_checkpoint": {
+          "type": "string"
+        },
+        "frozen_checkpoint_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "side_schedule": {
+          "enum": [
+            "alternate"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "description": "Policy ownership. learner_vs_frozen alternates learner seat by PPO update and optimizes only learner-owned decisions; reward configuration remains unchanged."
+    }
+  },
+  "additionalProperties": false
+}

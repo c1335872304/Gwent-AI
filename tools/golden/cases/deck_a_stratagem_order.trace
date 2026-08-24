@@ -1,0 +1,5 @@
+# Deterministic Deck A, no shuffle.
+# Use the first-player stratagem on the first unit in hand.
+keep_hand p=0
+keep_hand p=1
+use_order p=0 source=self:melee:0 target=self:hand:0

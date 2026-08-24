@@ -1,0 +1,10 @@
+# Deterministic Deck A, no shuffle.
+# Hand index 7 is Naglfar. It now creates a deck-card pending choice;
+# the default choose_target picks the first FastRng-revealed gold card and
+# then asks for a row to deploy the selected unit.
+keep_hand p=0
+keep_hand p=1
+play_hand p=0 h=7
+choose_target p=0
+choose_row p=0 side=self row=melee
+choose_insert p=0 side=self row=melee position=0

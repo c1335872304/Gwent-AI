@@ -1,0 +1,78 @@
+# Trainer Task Schema v3
+# 从旧 v6 最新模型 warm-start，
+# 重新适应统御修复和 CHOOSE_CARD 候选牌语义。
+
+schema_version: 3
+name: rulefix_v7_250k
+status: ready
+
+description: 从 mulligan_v3_250k 的 v6 策略 warm-start，适应统御平局规则修复和 Schema v7 choose_card 候选牌语义。
+
+
+algorithm:
+  config: configs/training/ppo_128env_strategic.yaml
+
+compatibility:
+  observation_schema: 7
+  action_grammar: 3
+
+initialization:
+  mode: warm_start
+
+  checkpoint: artifacts/checkpoints/pre_rulefix_v7/latest_v6.pt
+  checkpoint_sha256: ac58630f0a5ba1de76cafc67ef1b7cd5c6a3dad4005f8b54506f01398edfd166
+
+  source_observation_schema: 6
+  source_action_grammar: 3
+
+  # 不继承旧 optimizer 状态
+  reset_optimizer: true
+
+  # choose_card 输入语义发生变化，重置相关 embedding
+  reset_decision_embeddings: card_target
+  reset_option_embeddings: choose_card
+
+budget:
+  total_games: 250000
+  games_per_update: 2500
+
+runtime:
+  num_envs: 512
+  max_batch_size: 512
+  minibatch_size: 2048
+  collector_threads: 12
+  device: auto
+
+checkpoint:
+  interval_updates: 4
+
+evaluation:
+  enabled: true
+  every_updates: 4
+  games: 512
+  num_envs: 128
+  internal_promote_win_rate: 0.55
+
+execution:
+  run_dir: runs/tasks/rulefix_v7_250k
+  library: build-release/libgwent_core.so
+
+  # 第一次使用上面的 v6 checkpoint warm-start；
+  # 之后如果中断，则自动继续新的 v7 latest.pt。
+  resume: auto
+
+probes:
+  dominance_tie:
+    status: reserved
+    every_games: 25000
+    description: 检查双方最高战力相同时的统御策略。
+
+  choose_card_identity:
+    status: reserved
+    every_games: 25000
+    description: 检查盖尔等 choose_card 是否能区分不同候选牌。
+
+  duplicate_wild_hunt_rider:
+    status: reserved
+    every_games: 25000
+    description: 继续观察双狂猎骑士相关换牌策略。

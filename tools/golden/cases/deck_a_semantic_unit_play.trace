@@ -1,0 +1,2 @@
+# Shared Python/C++ semantic trace: player 0 plays the first shuffled Deck A hand unit.
+play_hand p=0 h=0 row=melee side=self

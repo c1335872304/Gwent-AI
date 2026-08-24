@@ -1,0 +1,56 @@
+# Trainer Task Schema v3
+# 正式目标：保留 pre-Mulligan 最强策略知识，在 Action Grammar v3 上学习换牌。
+schema_version: 3
+name: mulligan_v3_250k
+status: ready
+description: 以 update_000088.pt 作为 warm-start 基线，保留正常策略知识，重置 Mulligan/KEEP 新语义入口和 optimizer，再在 Action Grammar v3 上训练 25 万完整对局。
+
+algorithm:
+  config: configs/training/ppo_128env_strategic.yaml
+
+
+initialization:
+  mode: warm_start
+  checkpoint: artifacts/checkpoints/pre_mulligan_v2/update_000088.pt
+  checkpoint_sha256: 921dacf91fdbb11f924b6f2bda931b5ad46712d04706eb95c404cfc8175b35e1
+  source_observation_schema: 6
+  source_action_grammar: 2
+  reset_optimizer: true
+  reset_decision_embeddings: mulligan
+  reset_option_embeddings: mulligan,keep_hand
+
+budget:
+  total_games: 250000
+  games_per_update: 2500
+
+runtime:
+  num_envs: 512
+  max_batch_size: 512
+  minibatch_size: 2048
+  collector_threads: 24
+  device: auto
+
+checkpoint:
+  interval_updates: 4
+
+evaluation:
+  enabled: true
+  every_updates: 4
+  games: 512
+  num_envs: 128
+  internal_promote_win_rate: 0.55
+
+execution:
+  run_dir: runs/tasks/mulligan_v3_250k
+  library: build-release/libgwent_core.so
+  resume: auto
+
+probes:
+  duplicate_wild_hunt_rider:
+    status: reserved
+    every_games: 25000
+    description: 固定双狂猎骑士起手，观察模型是否逐步形成换掉一张的条件策略。
+  single_wild_hunt_rider:
+    status: reserved
+    every_games: 25000
+    description: 与双骑士 probe 对照，避免模型学成机械换牌。

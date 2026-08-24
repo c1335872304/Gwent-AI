@@ -1,0 +1,2 @@
+play_hand p=0 cid=202614 row=melee side=self
+use_leader p=1 target=enemy:melee:1

@@ -1,0 +1,3 @@
+# Shared Python/C++ semantic trace: both players pass and round transition is compared.
+pass p=0
+pass p=1

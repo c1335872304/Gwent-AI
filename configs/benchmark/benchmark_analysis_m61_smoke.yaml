@@ -1,0 +1,9 @@
+# Smoke-sized benchmark suite for m61 analysis/autotuning tests.
+envs: 4,8
+hidden_dims: 32,64
+text_modes: none,hash
+object_attention: true,false
+self_attention: true
+rounds: 2
+warmup_rounds: 1
+output_dir: runs/benchmarks/m61_smoke

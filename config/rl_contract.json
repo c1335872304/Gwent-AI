@@ -1,0 +1,5 @@
+{
+  "observation_schema": 13,
+  "action_grammar": 5,
+  "reward_config": 2
+}

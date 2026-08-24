@@ -1,0 +1,15 @@
+# Documentation-oriented config for m60 benchmark/ablation runs.
+# The benchmark suite accepts comma-separated CLI matrices because the project
+# intentionally avoids a mandatory PyYAML dependency.
+seed: 0
+collector:
+  reward_mode: terminal
+model:
+  hidden_dim: 128
+  num_attention_heads: 4
+  attention_layers: 1
+  text_embedding_mode: npz
+  text_embedding_dim: 1024
+  text_embedding_path: data/embeddings/supported_cards_text_embeddings_qwen1024.npz
+  use_candidate_object_attention: true
+  use_candidate_self_attention: true

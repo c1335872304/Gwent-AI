@@ -1,0 +1,3 @@
+# C++-first corrected rule: UseOrder is an intra-turn order; the stratagem instruction resolves and the stratagem is removed immediately.
+# Python oracle may still keep it on board until explicit end_turn; that mismatch is documented in the manifest.
+use_order p=0 source=self:melee:0 target=self:hand:0

@@ -1,0 +1,6 @@
+play_hand p=0 cid=202614 row=melee side=self
+play_hand p=1 cid=202614 row=melee side=self
+play_hand p=0 cid=203265 row=melee side=self
+pass p=1
+play_hand p=0 cid=201698 row=melee side=self
+choose_target p=0 target=enemy:cemetery:0

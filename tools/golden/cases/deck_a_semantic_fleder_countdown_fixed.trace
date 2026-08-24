@@ -1,0 +1,7 @@
+# Fixed parity case: Fleder's countdown is an effect quota, not a generic turn counter.
+# P1 plays Fleder, then P0 plays Bruxa and chooses Fleder as the bleeding target.
+# Fleder should boost by the applied bleeding amount and consume countdown only when the bleeding trigger resolves.
+play_hand p=0 h=0 row=melee side=self
+play_hand p=1 h=1 row=melee side=self
+play_hand p=0 h=2 row=melee side=self
+choose_target p=0 target=enemy:melee:0

@@ -1,0 +1,41 @@
+schema_version: 3
+name: fair_observation_v1_warmstart_50k
+status: draft
+description: 从 schema-v12/grammar-v5 的 u20 策略迁移到 schema-v13 公平信息观察；隐藏对手真实手牌并加入公开牌表知识对象，重置优化器后继续 5 万局适应。
+
+algorithm:
+  config: configs/training/ppo_128env_ab_strategic.yaml
+
+initialization:
+  mode: warm_start
+  checkpoint: runs/tasks/insert_position_v1_warmstart_50k/checkpoints/update_000020.pt
+  checkpoint_sha256: 179db86508e8274b915416354c1fb36270ffe6b2f58e3b0105a61f3e0ded8966
+  source_observation_schema: 12
+  source_action_grammar: 5
+  reset_optimizer: true
+
+budget:
+  total_games: 50000
+  games_per_update: 2500
+
+runtime:
+  num_envs: 512
+  max_batch_size: 512
+  minibatch_size: 2048
+  collector_threads: 12
+  device: auto
+
+checkpoint:
+  interval_updates: 2
+
+evaluation:
+  enabled: true
+  every_updates: 2
+  games: 2000
+  num_envs: 128
+  internal_promote_win_rate: 0.55
+
+execution:
+  run_dir: runs/tasks/fair_observation_v1_warmstart_50k
+  library: build-release/libgwent_core.so
+  resume: never

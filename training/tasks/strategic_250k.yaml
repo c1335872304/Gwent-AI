@@ -1,0 +1,40 @@
+# Trainer Task Schema v3
+# 通用战略训练任务。与具体能力案例解耦，可作为稳定基线任务模板。
+schema_version: 3
+name: strategic_250k
+status: draft
+description: 从随机参数训练 Action Grammar v3 的 25 万完整对局研究基线；不作为当前强模型升级的默认生产路径。
+
+algorithm:
+  config: configs/training/ppo_128env_strategic.yaml
+
+
+initialization:
+  mode: random
+
+
+budget:
+  total_games: 250000
+  games_per_update: 2500
+
+runtime:
+  num_envs: 512
+  max_batch_size: 512
+  minibatch_size: 2048
+  collector_threads: 24
+  device: auto
+
+checkpoint:
+  interval_updates: 4
+
+evaluation:
+  enabled: true
+  every_updates: 4
+  games: 512
+  num_envs: 128
+  internal_promote_win_rate: 0.55
+
+execution:
+  run_dir: runs/tasks/strategic_250k
+  library: build-release/libgwent_core.so
+  resume: auto

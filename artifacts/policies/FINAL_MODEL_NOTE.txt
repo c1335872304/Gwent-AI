@@ -1,0 +1,17 @@
+GWENT V3 FINAL MODEL
+
+Final checkpoint name:
+
+  artifacts/policies/gwent_v3_final.pt
+
+Local runtime model slot:
+
+  models/v3/policy.pt
+
+The single V3 checkpoint contains both Deck A and Deck B paths:
+
+  Shared representation + A Private + B Private
+
+The finalized server training checkpoint used for this model is:
+
+  runs/gwent_v3_joint_veilfix_50k/checkpoints/best_joint.pt

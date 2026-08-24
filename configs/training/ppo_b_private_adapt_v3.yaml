@@ -1,0 +1,59 @@
+seed: 0
+device: auto
+run_dir: runs/gwent_v3_b_private_adapt
+checkpoint_interval: 2
+collector:
+  num_envs: 128
+  max_batch_size: 128
+  base_seed: 0
+  reward_mode: strategic
+  player0_deck: deck_b
+  player1_deck: deck_b
+  matchups:
+  reward_overrides:
+    round1_win_base: 0.10
+    round1_card_cost_weight: 0.05
+    round1_excess_card_penalty: 0.03
+    round2_win_base: 0.07
+    round2_card_cost_weight: 0.08
+    round2_excess_card_penalty: 0.03
+    close_round_win_bonus: 0.02
+    close_round_win_margin_cap: 15
+    max_step_reward_abs: 1.25
+  enable_invariants: false
+model:
+  architecture: shared_deck_private_v3
+  num_attention_heads: 4
+  attention_layers: 1
+  dropout: 0.0
+  text_embedding_mode: npz
+  text_embedding_path: data/embeddings/supported_cards_text_embeddings_qwen1024.npz
+  text_embedding_dim: 1024
+  freeze_text_embeddings: true
+  use_candidate_object_attention: true
+  use_candidate_self_attention: true
+  hidden_dim: 128
+ppo:
+  total_games: 50000
+  games_per_update: 2500
+  updates: 20
+  learning_rate: 0.0001
+  shared_learning_rate: 0.00003
+  private_learning_rate: 0.0001
+  epochs: 3
+  minibatch_size: 2048
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_ratio: 0.2
+  value_coef: 0.5
+  entropy_coef: 0.01
+  max_grad_norm: 0.5
+  target_kl: 0.03
+  value_clip: 0.2
+eval:
+  interval: 2
+  games: 512
+  num_envs: 128
+  opponent: current_best
+  controlled_player: 0
+  deterministic: true

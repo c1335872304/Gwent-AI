@@ -1,0 +1,58 @@
+schema_version: 1
+checkpoints:
+  pre_mulligan_v2_best:
+    path: artifacts/checkpoints/pre_mulligan_v2/update_000088.pt
+    sha256: 921dacf91fdbb11f924b6f2bda931b5ad46712d04706eb95c404cfc8175b35e1
+    role: historical_baseline_and_warm_start_source
+    status: pinned
+    observation_schema: 6
+    action_grammar: 2
+    update: 88
+    total_games: 220000
+    model:
+      hidden_dim: 128
+      num_attention_heads: 4
+      attention_layers: 1
+      text_embedding_dim: 1024
+    note: 用户指定为原 25 万局 run 的最强 checkpoint；机械可验证的 checkpoint 计数为 220000 complete games。
+
+  pre_rulefix_v6_source:
+    path: artifacts/checkpoints/pre_rulefix_v7/latest_v6.pt
+    sha256: ac58630f0a5ba1de76cafc67ef1b7cd5c6a3dad4005f8b54506f01398edfd166
+    role: historical_baseline_and_warm_start_source
+    status: pinned
+    observation_schema: 6
+    action_grammar: 3
+    note: Schema v7 rulefix 训练任务的已登记 v6 warm-start 来源；模型文件按源码包策略不打包。
+
+  rulefix_v7_best:
+    path: artifacts/checkpoints/rulefix_v7_best/best.pt
+    sha256: 023be1a44bf0eb27737bc98a0a6ae3dce5adf64fbda078b57f454632c084763f
+    role: historical_baseline_and_warm_start_source
+    status: pinned
+    observation_schema: 7
+    action_grammar: 3
+    update: 80
+    total_games: 200000
+    model:
+      hidden_dim: 128
+      num_attention_heads: 4
+      attention_layers: 1
+      text_embedding_dim: 1024
+    note: rulefix_v7_250k 训练线内部评估晋升的 best；迁移到当前环境时保留旧特征列并使用当前 supported-card Qwen 表。
+
+  pre_insert_position_v4_best:
+    path: artifacts/checkpoints/pre_insert_position/latest.pt
+    sha256: 86f2a5915be988b24c50c58faa7bdc7d6b12262b78f50dc3c608386a4bab9717
+    role: historical_baseline_and_warm_start_source
+    status: pinned
+    observation_schema: 11
+    action_grammar: 4
+    update: 40
+    total_games: 100000
+    model:
+      hidden_dim: 128
+      num_attention_heads: 4
+      attention_layers: 1
+      text_embedding_dim: 1024
+    note: A/B 10万完整对局强模型；动态排内位置加入前的最后版本。用于显式 11/4 -> 12/5 warm-start，不作为本地 production checkpoint 直接加载。

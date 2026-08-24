@@ -1,0 +1,41 @@
+schema_version: 3
+name: ab_warmstart_100k
+status: ready
+description: 从 rulefix v7 的 pinned best 迁移策略知识，在当前 A/B 多卡组环境继续训练 10 万完整对局。
+
+algorithm:
+  config: configs/training/ppo_128env_ab_strategic.yaml
+
+initialization:
+  mode: warm_start
+  checkpoint: artifacts/checkpoints/rulefix_v7_best/best.pt
+  checkpoint_sha256: 023be1a44bf0eb27737bc98a0a6ae3dce5adf64fbda078b57f454632c084763f
+  source_observation_schema: 7
+  source_action_grammar: 3
+  reset_optimizer: true
+
+budget:
+  total_games: 100000
+  games_per_update: 2500
+
+runtime:
+  num_envs: 512
+  max_batch_size: 512
+  minibatch_size: 2048
+  collector_threads: 24
+  device: auto
+
+checkpoint:
+  interval_updates: 4
+
+evaluation:
+  enabled: true
+  every_updates: 4
+  games: 512
+  num_envs: 128
+  internal_promote_win_rate: 0.55
+
+execution:
+  run_dir: runs/tasks/ab_warmstart_100k
+  library: build-release/libgwent_core.so
+  resume: auto
