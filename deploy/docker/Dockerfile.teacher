@@ -1,0 +1,22 @@
+ARG PYTHON_BASE_IMAGE=python:3.10-slim-bookworm
+FROM ${PYTHON_BASE_IMAGE}
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
+
+WORKDIR /app
+
+COPY services/teacher/requirements.txt /tmp/requirements.txt
+RUN python -m pip install --no-cache-dir --upgrade pip \
+    && python -m pip install --no-cache-dir -r /tmp/requirements.txt
+
+COPY services ./services
+COPY data/cards/reference/all_cards.json ./data/cards/reference/all_cards.json
+
+EXPOSE 8020
+
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=6 \
+    CMD ["python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:8020/health', timeout=2)"]
+
+CMD ["uvicorn", "services.teacher.api:app", "--host", "0.0.0.0", "--port", "8020"]

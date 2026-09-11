@@ -1,0 +1,8 @@
+services:
+  trainer:
+    image: gwent-trainer:cu124
+    build:
+      args:
+        TORCH_INDEX_URL: https://download.pytorch.org/whl/cu124
+        TORCH_VERSION: 2.6.0+cu124
+    gpus: all

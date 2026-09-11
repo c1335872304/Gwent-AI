@@ -113,6 +113,7 @@ h1, h2, h3, p { margin-top: 0; }
 .detail-list div { display: flex; justify-content: space-between; gap: 18px; padding: 8px 0; border-bottom: 1px solid #25303c; }
 .detail-list dt { color: #8f9ba7; }
 .detail-list dd { margin: 0; text-align: right; }
+.card-detail__ability { margin: 0 0 18px; padding: 12px; border: 1px solid #2d3a47; border-radius: 10px; background: #0d141b; color: #dbe5ed; line-height: 1.7; white-space: pre-line; }
 .status-list { display: flex; flex-wrap: wrap; gap: 8px; }
 .status-list span { padding: 7px 10px; border-radius: 999px; background: #2b2515; color: #ead28d; }
 .detail-note { margin-top: 18px; padding-top: 14px; border-top: 1px solid #26313d; color: #82909d; font-size: 13px; }
@@ -407,6 +408,7 @@ h1, h2, h3, p { margin-top: 0; }
   color: #e9eff4;
   padding: 6px 8px;
 }
+.teacher-mode-note { margin: 10px 0 0; color: #87a1b5; font-size: 12px; line-height: 1.5; }
 .teacher-step-nav {
   display: grid;
   grid-template-columns: 34px 1fr 34px;
@@ -438,6 +440,16 @@ h1, h2, h3, p { margin-top: 0; }
 .teacher-details summary { cursor: pointer; color: #9fb4c4; font-size: 12px; }
 .teacher-details ul { margin: 9px 0 0; padding-left: 18px; color: #8fa0ad; font-size: 12px; line-height: 1.55; }
 .teacher-caveat { margin-top: 12px !important; color: #71828f !important; font-size: 11px; line-height: 1.5 !important; }
+.teacher-turn-stop { margin-top: 9px !important; color: #91aabb !important; font-size: 12px; }
+.teacher-turn-steps { display: grid; gap: 9px; margin-top: 12px; }
+.teacher-turn-step { padding: 10px; border: 1px solid #314353; border-radius: 9px; background: #111a22; }
+.teacher-turn-step > header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.teacher-turn-step > header strong { color: #e7f0f6; font-size: 13px; }
+.teacher-turn-step > header span { color: #7696ac; font-size: 10px; white-space: nowrap; }
+.teacher-turn-step > p { margin: 7px 0 0; color: #b6c3cd; font-size: 12px; line-height: 1.6; }
+.teacher-required-choices { display: grid; gap: 8px; margin-left: 13px; padding-left: 12px; border-left: 2px solid #405b70; }
+.teacher-required-choices > span { color: #8daabd; font-size: 11px; }
+.teacher-turn-step--choice { background: #101820; border-color: #2c4659; }
 .teacher-unavailable {
   display: grid;
   gap: 5px;

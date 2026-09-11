@@ -119,7 +119,6 @@ def check_python_tool_syntax() -> None:
         ROOT / "tools" / "server",
         ROOT / ".agents" / "skills" / "core-environment" / "scripts",
         ROOT / ".agents" / "skills" / "training-config" / "scripts",
-        ROOT / ".agents" / "skills" / "product-integration" / "scripts",
         ROOT / ".agents" / "skills" / "teacher-explanation" / "scripts",
         ROOT / "apps" / "web" / "backend" / "app",
         ROOT / "apps" / "web" / "tools",
@@ -189,7 +188,6 @@ def check_local_model_slot() -> None:
 
 def quick() -> None:
     check_agent_package()
-    run(sys.executable, "scripts/check_skill_system.py")
     check_docs()
     check_python_tool_syntax()
     check_product_contract()

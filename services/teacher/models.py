@@ -39,10 +39,39 @@ class TeacherResponse:
     action_label: str
     policy_probability: float | None
     state_value: float | None
+    action_role: str | None = None
+    parent_decision_serial: int | None = None
     alternatives: tuple[TeacherAlternative, ...] = ()
     grounded_facts: tuple[str, ...] = ()
     caveats: tuple[str, ...] = ()
     prompt: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class TeacherTurnRequest:
+    """A Core-produced, read-only current-turn branch trace."""
+
+    turn_trace: dict[str, Any]
+    level: TeacherLevel = "beginner"
+    language: str = "zh-CN"
+    top_k: int = 3
+
+
+@dataclass(frozen=True)
+class TeacherTurnResponse:
+    schema_version: str
+    level: TeacherLevel
+    headline: str
+    explanation: str
+    stopped_reason: str
+    steps: tuple[TeacherResponse, ...]
+    root_decision_serial: int | None = None
+    boundary: str | None = None
+    grounded_facts: tuple[str, ...] = ()
+    caveats: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

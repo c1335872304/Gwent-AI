@@ -5,7 +5,7 @@ import time
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.clients.gwent_core import GwentCoreError
+from app.clients.gwent_core import GwentCoreCommandError, GwentCoreError, GwentCoreStaleStateError
 from app.models.core_contract import CoreHealth, CoreReloadResult, GameMode, GameState
 from app.services.game_service import GameService
 
@@ -27,6 +27,8 @@ class NewGameRequest(RequestModel):
 
 class StepRequest(RequestModel):
     option_index: int = Field(ge=0)
+    match_id: str | None = Field(default=None, pattern=r"^[0-9a-f]{32}$")
+    expected_revision: int | None = Field(default=None, ge=0)
 
 
 class ReloadRequest(RequestModel):
@@ -45,6 +47,10 @@ def service(request: Request) -> GameService:
 
 
 def as_http_error(exc: GwentCoreError) -> HTTPException:
+    if isinstance(exc, GwentCoreStaleStateError):
+        return HTTPException(status_code=409, detail={"code": exc.code, "message": str(exc)})
+    if isinstance(exc, GwentCoreCommandError):
+        return HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": str(exc)})
     return HTTPException(status_code=502, detail=str(exc))
 
 
@@ -66,23 +72,27 @@ async def state(game: GameService = Depends(service)) -> GameState:
 
 
 @router.post("/game/new", response_model=GameState)
-async def new_game(req: NewGameRequest, game: GameService = Depends(service)) -> GameState:
+async def new_game(req: NewGameRequest, request: Request, game: GameService = Depends(service)) -> GameState:
     try:
-        return await game.new_game(
+        state = await game.new_game(
             req.seed,
             req.starting_player_id,
             req.player0_deck_id,
             req.player1_deck_id,
             req.mode,
         )
+        await request.app.state.teacher_preview_service.invalidate_except(state.match_id, state.revision)
+        return state
     except GwentCoreError as exc:
         raise as_http_error(exc) from exc
 
 
 @router.post("/game/step", response_model=GameState)
-async def step(req: StepRequest, game: GameService = Depends(service)) -> GameState:
+async def step(req: StepRequest, request: Request, game: GameService = Depends(service)) -> GameState:
     try:
-        return await game.step(req.option_index)
+        state = await game.step(req.option_index, req.match_id, req.expected_revision)
+        await request.app.state.teacher_preview_service.invalidate_except(state.match_id, state.revision)
+        return state
     except GwentCoreError as exc:
         raise as_http_error(exc) from exc
 

@@ -1,0 +1,4 @@
+# Runtime dependencies for the standalone trainer image.
+# Training config/task parsing intentionally uses the repository's small YAML
+# reader, so PyYAML is not required for the normal Trainer path.
+numpy==1.26.4

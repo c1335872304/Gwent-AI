@@ -29,6 +29,8 @@ def _state() -> GameState:
     return GameState.model_validate(
         {
             "api_version": 1,
+            "match_id": "a" * 32,
+            "revision": 7,
             "summary": {
                 "round": 1,
                 "turn": 7,

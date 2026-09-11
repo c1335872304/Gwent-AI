@@ -376,6 +376,9 @@ GWENT_C_API gwent_rl_reward_config gwent_rl_default_reward_config(void);
 GWENT_C_API gwent_rl_config gwent_rl_default_config(void);
 GWENT_C_API gwent_rl_collector_config gwent_rl_default_collector_config(void);
 GWENT_C_API gwent_rl_env* gwent_rl_env_create(const gwent_rl_config* config);
+/* Creates an independent copy of an RL environment for read-only product
+ * simulations. Stepping the clone never mutates the source environment. */
+GWENT_C_API gwent_rl_env* gwent_rl_env_clone(const gwent_rl_env* source);
 GWENT_C_API void gwent_rl_env_destroy(gwent_rl_env* env);
 
 GWENT_C_API gwent_c_result_code gwent_rl_env_reset(

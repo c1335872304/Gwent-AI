@@ -6,6 +6,10 @@
 python scripts/check.py quick
 ```
 
+该入口用于源码卫生检查，默认要求仓库不携带产品模型二进制。已经安装
+`models/v3/policy.pt` 的本地 Docker 工作区，应额外使用 `LOCAL_DOCKER.md` 的模型、schema 和
+healthcheck 验收；不要把该模型存在误判为模型不兼容。
+
 完整测试入口：
 
 ```bash

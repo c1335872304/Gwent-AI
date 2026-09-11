@@ -1,86 +1,86 @@
 ---
 name: core-environment
-description: 维护 Gwent C/C++ 游戏规则、卡牌、legal action、pending decision、C ABI 与 RL environment contract 时使用；也用于 Observation / Action Grammar / runtime card catalog 的 breaking change、兼容性检查与 Core→Training/Product handoff。
+description: 维护 Gwent C/C++ 游戏规则与环境 contract 时使用；覆盖新卡、legal action、顺序决策，以及 RL observation/action schema 和跨 Training 兼容边界。
 ---
 
 # Core Environment
 
-把 C/C++ Core 当作游戏规则与环境 contract 的唯一事实来源。这个 Skill 不保存 Core 百科，而是给 Coding Agent 一条可重复的修改路径：先定位 authoritative source，再判断 contract 影响，做最小修改，最后用确定性检查证明没有把规则或 ABI 悄悄复制到其他层。
+这个 Skill 只维护三个会反复出现的 Core 工作流：
 
-## Authoritative sources
+1. **新增/扩展卡牌**：怎样安全地把一张卡加入 C/C++ 环境。
+2. **动作/规则 Contract**：怎样修改 legal action、pending choice 和执行语义而不丢失边界信息。
+3. **Schema Contract**：环境给训练层暴露什么，以及什么时候需要升级版本。
+4. **Runtime card/catalog 完整性**：运行时生成、变形、派生选择或 helper definition 不能只靠起始牌组装载。
 
-按任务读取最小必要材料：
+不要把它扩展成 Core 百科全书。
 
-- 新增/扩展卡牌：`references/CARD_EXTENSION.md`
-- runtime spawn / transform / helper definition：`references/RUNTIME_CARD_CATALOG.md`
-- legal action / pending choice / C ABI option：`references/ACTION_CONTRACT.md`
-- Observation / Action Grammar / Reward ABI：`references/SCHEMA_CONTRACT.md`
+## A. 新卡扩展
 
-版本数字的唯一人工来源是 `config/rl_contract.json`，生成的 C/Python mirror 不手改。
+1. 运行只读占位脚本：
+   `python .agents/skills/core-environment/scripts/card_extension_stub.py --card "<name-or-id>"`
+2. 阅读 `references/CARD_EXTENSION.md`。
+3. 找行为最接近的现有卡和测试。
+4. 优先复用已有 primitive/effect；只扩展最小必要能力。
+5. 添加最接近层级的测试；涉及动作/决策/状态序列时再用 golden/trace。
 
-## Workflow
+## B. Runtime card / catalog 完整性
 
-1. **Classify**：判断任务属于 card behavior、runtime catalog、action contract 或 schema contract；不要因为文件语言不同就换 owner。
-2. **Locate**：从对应 Reference 找到事实源和已有相似实现；新卡优先复用已有 primitive/effect。
-3. **Assess contract impact**：明确是否改变 legal surface、C ABI、Observation、Action Grammar、Reward ABI 或玩家可知信息。
-4. **Make the smallest change**：只修改事实源与必要消费者；禁止在 Python/TypeScript 补一份规则。
-5. **Verify locally**：运行 `python .agents/skills/core-environment/scripts/verify.py`；需要 C/Python focused regression 时追加 `--tests`。
-6. **Handoff**：若 contract 已改变，向 Trainer/Product 提供结构化字段、版本和验证结果，由消费者处理各自兼容逻辑。
+只要卡牌效果会出现以下任一情况，就必须阅读
+`references/RUNTIME_CARD_CATALOG.md`：
 
-## Decision rules
+- 运行时 `spawn/create` 一张不一定在起始牌组中的卡；
+- `transform` 到另一张定义；
+- 通过 card-definition choice / helper definition 表达“择一”；
+- 从牌组外创建 token、特殊牌、派生牌；
+- effect handler 通过 card id 再查另一张 definition。
 
-### Card extension
+硬性规则：
 
-先运行只读定位工具：
+1. **C/C++ Core 仍是唯一规则事实来源**；Python/RL 不补卡牌规则。
+2. 真实 `api::Game::create()` 后的 `CardCatalog` 必须覆盖所有 supported runtime dependencies，而不是只覆盖两个 deck spec。
+3. 新增 runtime dependency 时，除了卡牌级 unit test，还必须有至少一个走真实 `Game::create()` 的 integration/regression test。
+4. 如果 RL trace 中某个应有的 pending choice 完全没有出现，先检查 Core catalog / continuation / C API 路径，禁止直接归因于“模型不会玩”。
+5. 测试不能只用手工安装完整 catalog 的 fixture 来证明真实环境可用。
 
-```bash
-python .agents/skills/core-environment/scripts/card_extension_stub.py --card "<name-or-id>"
-```
+## C. 动作/规则 Contract
 
-随后找最接近的现有卡和测试。只有现有 primitive/effect 无法表达行为时才扩展能力。涉及 runtime create/transform/helper definition 时必须同时检查 catalog dependency closure 和真实 `api::Game::create()` 路径。
+涉及 Action、legal action、pending choice、C ABI 或 RL option 时，先完整阅读
+`references/ACTION_CONTRACT.md`。玩家动作信息必须从 Core 一直保留到 C/Python collector；
+不要在 RL 层合并语义不同的候选项。
 
-### Action / decision change
+## D. Schema Contract
 
-语义不同的候选动作必须从 Core 一直保留到 C/Python collector；不能为了简化 policy input 在 RL 层提前合并。若 Product 需要新展示字段，优先扩展结构化 contract，不让 UI 解析 label/source/target 文本。
+Schema 的 owner 是 **Core Agent**。Training Agent 只消费、校验和处理 checkpoint 兼容性。
 
-### Schema change
+先阅读 `references/SCHEMA_CONTRACT.md`，然后运行：
 
-先运行：
+`python .agents/skills/core-environment/scripts/check_schema.py`
 
-```bash
-python .agents/skills/core-environment/scripts/check_schema.py
-```
+核心规则只有三条：
 
-只 bump 真正 breaking 的 contract。Observation 信息语义改变时同时检查 information boundary，并要求 Trainer 对旧 checkpoint 做显式 resume / warm-start / incompatible 判断。
+- 当前 RL Observation / Action Grammar / Reward ABI 版本的唯一人工来源是 `config/rl_contract.json`。
+- 版本升级使用 `python scripts/bump_rl_contract.py --schema/--grammar/--reward ...`；生成的 C/Python mirror 不手改。
+- `TASK_SCHEMA_VERSION`：Training Task YAML 格式版本；属于 Training，不随环境 schema 自动升级。
 
-## Invariants
+**不要因为其中一个版本变化，就顺手 bump 另外几个 contract。**
 
-- C/C++ Core 是游戏规则、legal action 和 environment contract 的事实源。
-- Python/RL、FastAPI、React 不复制卡牌规则或合法性。
-- `GameState` 可以持有私有状态，但 fair Observation 不暴露对手真实手牌、牌库顺序或其他隐藏分配结果。
-- runtime card dependency 不能只靠起始牌组推断；真实 `Game::create()` 必须可解析运行时会出现的 definition。
-- 不因为一个版本变化顺手 bump 其他 contract；`TASK_SCHEMA_VERSION` 属于 Training。
-- checkpoint migration policy 属于 Trainer，不能反向定义当前 Core schema。
+当 observation 的字段、维度或语义发生破坏性变化时，Core 才升级 observation schema；当前文档描述语义但不复制可变版本数字。随后由 Training Agent 单独判断旧 checkpoint 是 resume、warm-start 还是不兼容。
 
-## Verification
+## 边界
 
-最小确定性证据：
+- 不在 Python 复制游戏规则。
+- 不为了单张卡创建不必要的新抽象。
+- card scaffolder 未来只生成 boilerplate，不生成复杂规则语义。
+- Core 定义 environment contract；Training 不自行发明当前环境 schema 版本。
+- checkpoint migration policy 可以属于 Training，但它不能反向定义 Core schema。
 
-```bash
-python .agents/skills/core-environment/scripts/verify.py
-```
 
-涉及 legal action / C ABI / collector 的修改，再运行：
+## Information-boundary regression rule
 
-```bash
-python .agents/skills/core-environment/scripts/verify.py --tests
-```
+任何 Observation / C API / Collector 改动都必须同时检查“规则事实”和“玩家可知信息”：
 
-最终回复必须说明：修改的 authoritative source、contract 是否 breaking、运行了哪些检查、是否需要跨 Agent 同步。
-
-## Handoff
-
-- Observation / Action Grammar breaking change：Core 定义新 contract；Trainer 决定 checkpoint migration。
-- HTTP 需要新结构化 action/state 字段：Core 定义字段；Product 同步 BFF/types/UI。
-- Teacher 缺 authoritative game fact：Core/Strategy 暴露结构化 evidence；Teacher 不从文本反推。
-- 纯训练预算、reward/GAE、run orchestration：停止修改 Core，交给 Trainer。
+1. C++ `GameState` 可以持有完整私有状态，但 RL Observation 不得直接序列化对手真实手牌或牌库顺序。
+2. 公共牌表必须作为 definition-only knowledge 表达，不得借用物理 Hand/Deck zone 暴露分配结果。
+3. fair mode 是训练/评估默认；oracle/private mode 只能用于 debug/ablation。
+4. Observation 信息语义改变必须 bump schema，并提供显式 warm-start migration；旧 checkpoint 不允许 silent resume。
+5. 至少保留一个 C API regression：own hand visible、opponent hand hidden、opponent hand count visible、both public decklists visible。

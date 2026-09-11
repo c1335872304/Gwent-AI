@@ -27,6 +27,7 @@ export interface GameObject {
   card_id: number
   name: string
   type: string
+  ability_text: string
   owner: number
   controller: number
   zone: number
@@ -95,6 +96,8 @@ export interface DeckSelection {
 
 export interface GameState {
   api_version: number
+  match_id: string
+  revision: number
   summary: GameSummary
   objects: GameObject[]
   row_effects: RowEffect[]
@@ -140,6 +143,8 @@ export interface TeacherResponse {
   action_label: string
   policy_probability: number | null
   state_value: number | null
+  action_role?: "root_action" | "required_choice" | null
+  parent_decision_serial?: number | null
   alternatives: TeacherAlternative[]
   grounded_facts: string[]
   caveats: string[]
@@ -149,5 +154,27 @@ export interface TeacherResponse {
 export interface TeacherExplainResult {
   ok: boolean
   response?: TeacherResponse | null
+  error?: string | null
+}
+
+export interface TeacherTurnResponse {
+  schema_version: string
+  level: TeacherLevel
+  headline: string
+  explanation: string
+  stopped_reason: string
+  steps: TeacherResponse[]
+  root_decision_serial?: number | null
+  boundary?: "one_root_action_with_required_choices" | string | null
+  grounded_facts: string[]
+  caveats: string[]
+}
+
+export interface TeacherTurnPreviewResult {
+  ok: boolean
+  base_match_id?: string | null
+  base_revision?: number | null
+  stale?: boolean
+  response?: TeacherTurnResponse | null
   error?: string | null
 }

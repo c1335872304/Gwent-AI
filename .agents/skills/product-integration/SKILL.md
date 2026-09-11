@@ -1,66 +1,48 @@
 ---
 name: product-integration
-description: 维护 Gwent React/FastAPI 产品层时使用；覆盖 Core HTTP/JSON contract、动态 legal action UI、BFF strict models、TypeScript types、Teacher panel 集成、错误降级以及 Core→Product breaking-change 同步。
+description: 维护 Gwent React/FastAPI 产品层、Core HTTP contract、动态合法动作交互和 Teacher 展示集成时使用。
 ---
 
-# Product Integration
+# Product Integration Skill
 
-把 Product 保持成“结构化 contract 的消费者”，而不是第二套游戏引擎。React/FastAPI 负责展示、转发、错误处理和可选 Teacher 编排；合法性始终来自 Core。
+用于 `apps/web/` 的 React/FastAPI 产品集成任务。
 
-## Authoritative sources
+## 边界
 
-先读 `references/CORE_HTTP_CONTRACT.md`，再定位：
+- `tools/server/human_vs_ai.py` / Core HTTP adapter 输出权威状态与合法 actions。
+- FastAPI BFF 只做产品级转发、错误处理和未来 Teacher 编排。
+- React 只呈现状态并提交最新 `option_index`。
+- 不在 Product 层复制卡牌规则、legal action、PPO 推理或 checkpoint loader。训练服务器不是 Product runtime 依赖；`human_vs_ai.py` 在本地加载 promotion 后的 `models/v3/policy.pt`，Product 仍只消费 HTTP。
 
-- Core HTTP adapter：`tools/server/human_vs_ai.py`
-- BFF typed contract：`apps/web/backend/app/models/core_contract.py`
-- frontend types：`apps/web/frontend/src/types/game.ts`
-- UI interaction：`apps/web/frontend/src/`
+## 交互工作流
 
-如果这些层缺少展示所需结构化字段，先提出 contract gap，不解析自然语言 label/source/target 猜规则。
+1. 先确认 Core 当前 `summary.decision` 与 `actions` contract。
+2. 只使用结构化字段：`source_object_index`、`target_object_index`、`target_side`、`target_zone`、`target_row`、`insert_position`；禁止解析 `source` / `target` / `label` 文本反推规则数据。
+3. `choose_insert_position` 必须按 Core actions 动态渲染 `0..N` 中实际返回的合法位置；UI 不自行根据牌数生成合法动作。
+4. 每次 step 后丢弃旧 action index，完全使用新 state 返回的 actions；提交时
+   同时带该 state 的 `match_id` 与 `revision`，收到 `stale_state` 时刷新 state，
+   不把它显示成规则引擎故障。
+5. 修改 contract 时同步更新：Core HTTP adapter → BFF strict Pydantic models → `apps/web/docs/CORE_API_CONTRACT.md` → frontend TypeScript types → UI，并按 breaking/non-breaking 判断是否 bump Product `api_version`。
 
-## Workflow
-
-1. **Confirm upstream contract**：检查 `summary.decision`、`actions`、`api_version` 以及当前结构化 metadata。
-2. **Keep actions authoritative**：UI 只渲染 Core 返回的合法 options，并原样提交 `option_index`；每次 step 后废弃旧 index。
-3. **Propagate types end-to-end**：Core adapter → BFF strict Pydantic model → contract doc → TypeScript type → component。
-4. **Render, do not re-derive**：例如 `choose_insert_position` 只按 Core 返回的 `insert_position` 渲染插槽，不用 `cards.length + 1` 自己生成合法动作。
-5. **Degrade optional dependencies**：Teacher timeout/failure 只影响解释 panel，不阻断 gameplay step。
-6. **Verify**：运行 `python .agents/skills/product-integration/scripts/verify.py`；改 React 时再追加 `--frontend`。
-
-## Decision rules
-
-- 新字段是 additive 且旧客户端可忽略：通常 non-breaking；同步 types/tests 即可。
-- 删除/重命名/改变语义或合法 action 表达：按 breaking change 处理并显式 bump Product `api_version`。
-- UI 想要规则相关信息但 contract 没有：向 Core 请求结构化字段；禁止解析显示文本。
-- 需要 PPO/checkpoint/runtime 推理：不在 Product 层实现；继续通过 Core/Strategy HTTP adapter 消费结果。
-
-## Invariants
-
-- Product 不 import `gwent_rl`、不加载 C++ shared library、不直接加载 checkpoint。
-- Core `actions` 是唯一合法性来源；BFF/React 不重算 legal action。
-- 只消费结构化 target/source/row/position metadata，不从文本反推规则。
-- stale `option_index` 不跨 step 复用。
-- Teacher 不产生或覆盖 gameplay action。
-
-## Verification
-
-后端 + contract：
+## 最小验证
 
 ```bash
-python .agents/skills/product-integration/scripts/verify.py
+PYTHONPATH=apps/web/backend pytest -q apps/web/backend/tests
+python -m compileall -q apps/web/backend/app
+cd apps/web/frontend && npm ci && npm run build
 ```
 
-React 改动：
+若本机无法安装前端依赖，至少完成 TypeScript contract review，并在有 Node 环境时补跑 build。
 
-```bash
-python .agents/skills/product-integration/scripts/verify.py --frontend
-```
+## Teacher 原则
 
-最终回复必须给出：上游 contract、同步了哪些消费者、是否 breaking、验证结果以及是否需要 Core/Teacher handoff。
+Teacher 输入应是 Strategy Core 的结构化 decision trace，输出面向新手的解释。Teacher 不产生或覆盖 `option_index`，也不进入训练 reward/observation 链。
 
-## Handoff
+当前人类回合的 Teacher 使用独立的 `counterfactual-action-chain-v2` trace：BFF 调用 Core 只读预演，Core clone
+在分支内执行一个根行动及其 Core-required choice，Teacher 只解释已经存在的 branch steps。`root_action` 是给人类的指导动作，`required_choice` 必须以结构化 parent serial 关联 root；不能按 label 猜关系或继续执行第二个自由动作。该预演失败只能降级教师面板，不能让
+`/game/step` 失败。不要把 branch steps 写入 `last_ai_actions`，也不要在 BFF 或 React 复刻分支逻辑。
 
-- 缺少规则/合法性字段：交给 Core 定义 authoritative HTTP field。
-- Teacher evidence/output contract：交给 Teacher；Product 只负责展示和 loading/error UX。
-- checkpoint、训练服务器、模型 promotion：交给 Trainer。
-- 仅 React 布局/交互且不改变 contract：Product 可独立完成。
+修改此链路时，验证一次预演前后 `/api/game/state` 的 summary、objects、actions 和 checkpoint update 均不变。
+若 clone 中的 staged choice 污染真实 state，交由 Core 按 `$core-environment` 的 clone 不变量修复。
+预演/Teacher 缓存只能以 Core 的 `(match_id, revision, trace schema, level)` 为键；
+任何真实 `/new` 或 `/step` 必须使旧结果失效，React 只能渲染与当前 revision 相同的结果。

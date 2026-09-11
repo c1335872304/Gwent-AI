@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from app.clients.gwent_core import GwentCoreClient
-from app.models.core_contract import CoreHealth, CoreReloadResult, GameMode, GameState
+from app.models.core_contract import CounterfactualActionChainTrace, CoreHealth, CoreReloadResult, GameMode, GameState
 
 
 class GameService:
@@ -30,10 +30,29 @@ class GameService:
             mode=mode,
         )
 
-    async def step(self, option_index: int) -> GameState:
+    async def step(
+        self,
+        option_index: int,
+        match_id: str | None = None,
+        expected_revision: int | None = None,
+    ) -> GameState:
         # option_index is intentionally passed through unchanged. The
         # authoritative Core validates legality against its latest state.
-        return await self.core.step(option_index=option_index)
+        return await self.core.step(
+            option_index=option_index,
+            match_id=match_id,
+            expected_revision=expected_revision,
+        )
+
+    async def preview_current_human_turn(
+        self,
+        match_id: str | None = None,
+        expected_revision: int | None = None,
+    ) -> CounterfactualActionChainTrace:
+        return await self.core.preview_current_human_turn(
+            match_id=match_id,
+            expected_revision=expected_revision,
+        )
 
     async def reload_model(self, checkpoint: str | None) -> CoreReloadResult:
         return await self.core.reload_model(checkpoint=checkpoint)

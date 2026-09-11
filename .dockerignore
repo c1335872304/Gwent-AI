@@ -1,0 +1,38 @@
+.git
+.codex
+.agents
+.vscode
+.idea
+
+# Local and CI build outputs
+build/
+build-*/
+cmake-build-*/
+.build/
+.agent-build/
+**/*.o
+**/*.obj
+**/*.a
+**/*.lib
+**/*.so
+**/*.dylib
+**/*.dll
+**/*.exe
+
+# Python / Node transient files
+**/__pycache__/
+**/.pytest_cache/
+**/*.pyc
+apps/web/backend/.venv/
+apps/web/frontend/node_modules/
+apps/web/frontend/dist/
+apps/web/frontend/*.tsbuildinfo
+
+# Training and local inference artifacts are never Docker build context.
+runs/
+artifacts/
+models/
+
+# Local secrets and editor state
+**/.env
+services/*/.env

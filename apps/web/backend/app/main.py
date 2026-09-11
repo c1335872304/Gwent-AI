@@ -11,6 +11,7 @@ from app.clients.gwent_core import GwentCoreClient
 from app.clients.teacher import TeacherClient
 from app.config import get_settings
 from app.services.game_service import GameService
+from app.services.teacher_preview_service import TeacherPreviewService
 
 settings = get_settings()
 
@@ -21,8 +22,10 @@ async def lifespan(app: FastAPI):
     teacher = TeacherClient(settings.teacher_api_url, timeout_s=settings.teacher_timeout_s)
     await core.start()
     await teacher.start()
-    app.state.game_service = GameService(core)
+    game = GameService(core)
+    app.state.game_service = game
     app.state.teacher_client = teacher
+    app.state.teacher_preview_service = TeacherPreviewService(game, teacher)
     try:
         yield
     finally:

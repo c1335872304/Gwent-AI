@@ -58,21 +58,21 @@ export function AiPanel({ game, history }: { game: GameState; history: AiDecisio
 
   return (
     <aside className="panel ai-panel">
-      <h2>AI 决策核心</h2>
+      <h2>AI 决策过程</h2>
       <dl>
         <div><dt>模型版本</dt><dd>Update {game.checkpoint_update}</dd></div>
         <div><dt>推理设备</dt><dd>{game.device}</dd></div>
       </dl>
 
-      <h3>AI 最近一步</h3>
-      {latest ? <ActionSummary action={latest} /> : <span className="empty">AI 暂无动作。</span>}
+      <h3>AI 最近一次实际动作</h3>
+      {latest ? <ActionSummary action={latest} /> : <span className="empty">本局尚未发生 AI 实际动作。</span>}
 
       <button
         type="button"
         className="ai-history-button"
         onClick={() => setShowHistory((value) => !value)}
       >
-        {showHistory ? "收起 AI 决策历史" : "查看 AI 决策历史"}
+        {showHistory ? "收起 AI 决策过程" : "查看 AI 决策过程"}
         <span>{history.length} 次行动 / {totalDecisions} 个内部决策</span>
       </button>
 

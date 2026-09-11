@@ -11,6 +11,10 @@ class CardTextRecord:
     name: str
     type: str
     text: str
+    # Human-readable ability text is static card metadata.  Keep it separate
+    # from ``text`` because the latter also includes training features such as
+    # categories, effect ids and implementation metadata.
+    description: str = ""
 
 
 def find_supported_cards_json(start: Path | None = None) -> Path:
@@ -28,11 +32,20 @@ def load_supported_card_records(path: str | Path | None = None) -> list[CardText
     records: list[CardTextRecord] = []
     for card in data.get("cards", []):
         card_id = int(card["id"])
+        description = str(card.get("description") or "")
         categories = " ".join(card.get("categories", []))
         effects = " ".join(card.get("effect_ids", []))
         metadata = " ".join(f"{k}:{v}" for k, v in sorted(card.get("metadata", {}).items()))
-        text = " ".join(str(x) for x in [card.get("name", ""), card.get("type", ""), card.get("description", ""), categories, effects, metadata] if x)
-        records.append(CardTextRecord(card_id=card_id, name=str(card.get("name", card_id)), type=str(card.get("type", "")), text=text))
+        text = " ".join(str(x) for x in [card.get("name", ""), card.get("type", ""), description, categories, effects, metadata] if x)
+        records.append(
+            CardTextRecord(
+                card_id=card_id,
+                name=str(card.get("name", card_id)),
+                type=str(card.get("type", "")),
+                text=text,
+                description=description,
+            )
+        )
     return records
 
 

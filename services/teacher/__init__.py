@@ -5,6 +5,6 @@ changes legal actions and never participates in PPO training.
 """
 
 from .agent import TeacherAgent
-from .models import TeacherRequest, TeacherResponse
+from .models import TeacherRequest, TeacherResponse, TeacherTurnRequest, TeacherTurnResponse
 
-__all__ = ["TeacherAgent", "TeacherRequest", "TeacherResponse"]
+__all__ = ["TeacherAgent", "TeacherRequest", "TeacherResponse", "TeacherTurnRequest", "TeacherTurnResponse"]

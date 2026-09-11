@@ -63,3 +63,9 @@ class TeacherClient:
         if not isinstance(body, dict) or not isinstance(body.get("response"), dict):
             raise TeacherError("Teacher explain payload is missing response")
         return dict(body["response"])
+
+    async def explain_turn(self, payload: dict[str, Any]) -> dict[str, Any]:
+        body = await self._request_json("POST", "/v1/explain-turn", json=payload)
+        if not isinstance(body, dict) or not isinstance(body.get("response"), dict):
+            raise TeacherError("Teacher turn explanation payload is missing response")
+        return dict(body["response"])

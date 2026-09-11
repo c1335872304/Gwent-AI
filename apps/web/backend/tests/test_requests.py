@@ -38,6 +38,8 @@ async def test_core_client_forwards_manual_test_mode(monkeypatch) -> None:
         captured.update({"method": method, "path": path, "json": kwargs.get("json")})
         return {
             "api_version": CORE_API_VERSION,
+            "match_id": "a" * 32,
+            "revision": 0,
             "summary": {
                 "round": 1,
                 "turn": 0,
@@ -97,3 +99,86 @@ async def test_core_client_disables_environment_proxy(monkeypatch) -> None:
 
     assert captured["base_url"] == "http://127.0.0.1:8008"
     assert captured["trust_env"] is False
+
+
+@pytest.mark.asyncio
+async def test_core_client_requests_read_only_current_turn_preview(monkeypatch) -> None:
+    from app.clients.gwent_core import GwentCoreClient
+
+    client = GwentCoreClient("http://core.invalid")
+    captured = {}
+    summary = {
+        "round": 1,
+        "turn": 3,
+        "actor": 0,
+        "decision_kind": 6,
+        "decision": "insert_position",
+        "done": False,
+        "winner_id": -1,
+        "p0": {"score": 10, "hand": 7, "wins": 0, "passed": False},
+        "p1": {"score": 8, "hand": 7, "wins": 0, "passed": False},
+    }
+    step = {
+        "index": 0,
+        "kind_id": 11,
+        "kind": "choose_insert_position",
+        "label": "选择位置 · 2",
+        "card_id": -1,
+        "source": "-",
+        "target": "P0 Melee/Melee @ position 2",
+        "hand_slot": -1,
+        "stable_hash": "9",
+        "source_object_index": -1,
+        "target_object_index": -1,
+        "target_side": 0,
+        "target_zone": 3,
+        "target_row": 0,
+        "insert_position": 2,
+        "confidence": 0.6,
+        "value": 0.1,
+        "ms": 1.0,
+        "status": "APPLIED",
+        "reward_p0": 0.0,
+        "decision_serial": 1,
+        "parent_decision_serial": None,
+        "role": "root_action",
+        "actor_id": 0,
+        "source_card_id": -1,
+        "target_card_id": -1,
+        "source_zone": -1,
+        "summary_before": summary,
+        "summary_after": summary,
+    }
+
+    async def fake_request(method, path, **kwargs):
+        captured.update({"method": method, "path": path, "json": kwargs.get("json")})
+        return {
+            "api_version": 1,
+            "schema_version": "counterfactual-action-chain-v2",
+            "base_match_id": "a" * 32,
+            "base_revision": 3,
+            "base_state_signature": "a" * 64,
+            "controlled_player": 0,
+            "boundary": "one_root_action_with_required_choices",
+            "root": {
+                "decision_serial": 1,
+                "kind": step["kind"],
+                "card_id": step["card_id"],
+                "source_object_index": step["source_object_index"],
+            },
+            "status": "complete",
+            "stopped_reason": "action_chain_resolved",
+            "steps": [step],
+            "start_summary": summary,
+            "end_summary": summary,
+        }
+
+    monkeypatch.setattr(client, "_request_json", fake_request)
+    trace = await client.preview_current_human_turn("a" * 32, 3)
+
+    assert trace.steps[0].decision_serial == 1
+    assert captured == {
+        "method": "POST",
+        "path": "/preview/current-human-turn",
+        "json": {"match_id": "a" * 32, "expected_revision": 3},
+    }

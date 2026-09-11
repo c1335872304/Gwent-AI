@@ -57,6 +57,15 @@ def _card_name(candidate: Mapping[str, Any], kb: CardKnowledgeBase) -> str | Non
     return str(card.get("name")) if card else None
 
 
+def _card_name_from_field(candidate: Mapping[str, Any], field: str, kb: CardKnowledgeBase) -> str | None:
+    try:
+        card_id = int(candidate.get(field, -1))
+    except (TypeError, ValueError):
+        return None
+    card = kb.card(card_id)
+    return str(card.get("name")) if card else None
+
+
 def action_label(candidate: Mapping[str, Any], kb: CardKnowledgeBase) -> str:
     kind = str(candidate.get("option_kind") or "action")
     name = _card_name(candidate, kb)
@@ -65,8 +74,31 @@ def action_label(candidate: Mapping[str, Any], kb: CardKnowledgeBase) -> str:
 
     if kind == "pass":
         return "PASS（结束当前行动）"
-    if kind in {"play_card", "play", "choose_card"} and name:
+    if kind in {"play_card", "play"} and name:
         return f"打出《{name}》"
+    if kind == "use_leader" and name:
+        return f"使用领袖《{name}》"
+    if kind == "end_turn":
+        return "结束回合"
+    if kind == "choose_card":
+        source_name = _card_name_from_field(candidate, "source_card_id", kb)
+        target_name = _card_name_from_field(candidate, "target_card_id", kb) or name
+        try:
+            actor_id = int(candidate.get("actor_id", -1))
+            target_side = int(candidate.get("target_side_id", candidate.get("target_side", -1)))
+        except (TypeError, ValueError):
+            actor_id, target_side = -1, -1
+        side = "敌方" if actor_id in (0, 1) and target_side in (0, 1) and actor_id != target_side else ""
+        if source_name and target_name:
+            source_zone = candidate.get("source_zone", -1)
+            try:
+                source_prefix = "使用领袖" if int(source_zone) == 7 else "使用"
+            except (TypeError, ValueError):
+                source_prefix = "使用"
+            return f"{source_prefix}《{source_name}》选择{side}《{target_name}》"
+        if target_name:
+            return f"选择{side}《{target_name}》"
+        return "选择卡牌目标"
     if kind == "choose_row":
         try:
             return f"选择{ROW_NAMES.get(int(row), f'第 {int(row)} 排')}"

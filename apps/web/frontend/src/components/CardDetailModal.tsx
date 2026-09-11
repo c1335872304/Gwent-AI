@@ -28,6 +28,13 @@ export function CardDetailModal({ card, onClose }: { card: GameObject | null; on
           <div><dt>Card ID</dt><dd>{card.card_id}</dd></div>
         </dl>
 
+        <h3>卡牌能力</h3>
+        {card.ability_text ? (
+          <p className="card-detail__ability">{card.ability_text}</p>
+        ) : (
+          <p className="muted">当前卡牌没有登记能力文本。</p>
+        )}
+
         <h3>当前状态</h3>
         {card.status.length ? (
           <div className="status-list">
@@ -37,7 +44,7 @@ export function CardDetailModal({ card, onClose }: { card: GameObject | null; on
           <p className="muted">当前没有持续状态。</p>
         )}
 
-        <p className="detail-note">卡牌完整技能文本当前没有包含在游戏状态接口中；这里先展示核心实际返回的战力、护甲和持续状态。</p>
+        <p className="detail-note">能力文本来自 Core 的卡牌数据清单；战力、护甲和状态是本局实时值。</p>
       </section>
     </div>
   )

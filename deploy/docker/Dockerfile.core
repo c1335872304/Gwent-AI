@@ -1,0 +1,58 @@
+ARG PYTHON_BASE_IMAGE=python:3.10-slim-bookworm
+FROM ${PYTHON_BASE_IMAGE} AS core-builder
+
+RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources \
+    && apt-get -o Acquire::Retries=5 update \
+    && apt-get -o Acquire::Retries=5 install -y --no-install-recommends cmake g++ ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY CMakeLists.txt ./
+COPY cmake ./cmake
+COPY include ./include
+COPY src ./src
+
+RUN cmake -S . -B /build -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_SHARED_LIBS=ON \
+        -DGWENT_BUILD_TESTS=OFF \
+        -DGWENT_BUILD_TRACE_TOOLS=OFF \
+        -DGWENT_INSTALL_TRACE_TOOLS=OFF \
+    && cmake --build /build --parallel
+
+FROM ${PYTHON_BASE_IMAGE} AS runtime
+
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
+ARG TORCH_VERSION=2.6.0+cpu
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/python/src \
+    GWENT_PROJECT_ROOT=/app
+
+WORKDIR /app
+
+RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources \
+    && apt-get -o Acquire::Retries=5 update \
+    && apt-get -o Acquire::Retries=5 install -y --no-install-recommends libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY deploy/docker/requirements.core.cpu.txt /tmp/requirements.core.cpu.txt
+RUN python -m pip install --no-cache-dir --upgrade pip \
+    && python -m pip install --no-cache-dir -r /tmp/requirements.core.cpu.txt \
+    && python -m pip install --no-cache-dir --index-url "${TORCH_INDEX_URL}" "torch==${TORCH_VERSION}"
+
+COPY python/src ./python/src
+COPY tools/server ./tools/server
+COPY data ./data
+COPY --from=core-builder /build/libgwent_core.so /opt/gwent/lib/libgwent_core.so
+COPY deploy/docker/entrypoint-core.sh /usr/local/bin/gwent-core-entrypoint
+RUN chmod 0555 /usr/local/bin/gwent-core-entrypoint
+
+EXPOSE 8008
+
+HEALTHCHECK --interval=10s --timeout=3s --start-period=20s --retries=6 \
+    CMD ["python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:8008/health', timeout=2)"]
+
+ENTRYPOINT ["/usr/local/bin/gwent-core-entrypoint"]
+CMD ["python", "tools/server/human_vs_ai.py"]

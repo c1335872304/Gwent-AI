@@ -1,0 +1,21 @@
+ARG PYTHON_BASE_IMAGE=python:3.10-slim-bookworm
+FROM ${PYTHON_BASE_IMAGE}
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/apps/web/backend
+
+WORKDIR /app
+
+COPY apps/web/backend/requirements.txt /tmp/requirements.txt
+RUN python -m pip install --no-cache-dir --upgrade pip \
+    && python -m pip install --no-cache-dir -r /tmp/requirements.txt
+
+COPY apps/web/backend ./apps/web/backend
+
+EXPOSE 8010
+
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=6 \
+    CMD ["python", "-c", "import json; from urllib.request import urlopen; raise SystemExit(not json.load(urlopen('http://127.0.0.1:8010/api/health', timeout=2))['ok'])"]
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8010"]

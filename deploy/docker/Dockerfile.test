@@ -1,0 +1,21 @@
+ARG PYTHON_BASE_IMAGE=python:3.10-slim-bookworm
+FROM ${PYTHON_BASE_IMAGE}
+
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
+ARG TORCH_VERSION=2.6.0+cpu
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/workspace:/workspace/python/src:/workspace/apps/web/backend
+
+WORKDIR /workspace
+
+COPY deploy/docker/requirements.test.txt /tmp/requirements.test.txt
+RUN python -m pip install --no-cache-dir --upgrade pip \
+    && python -m pip install --no-cache-dir -r /tmp/requirements.test.txt \
+    && python -m pip install --no-cache-dir --index-url "${TORCH_INDEX_URL}" "torch==${TORCH_VERSION}"
+
+# Source and tests are mounted by the Compose test service.  Keeping the
+# dependency image separate means code edits do not invalidate pytest/Torch
+# layers, while the test command always reads the current working tree.
+CMD ["python", "-m", "pytest", "-q", "tools/server/tests", "services/teacher/tests", "apps/web/backend/tests"]

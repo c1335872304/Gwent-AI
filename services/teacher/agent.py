@@ -1,15 +1,17 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
 from .evidence import TeacherEvidence, action_label, build_evidence
 from .knowledge import CardKnowledgeBase
-from .models import TeacherAlternative, TeacherRequest, TeacherResponse
+from .models import TeacherAlternative, TeacherRequest, TeacherResponse, TeacherTurnRequest, TeacherTurnResponse
 from .prompt_builder import build_grounded_prompt
 from .providers import TeacherTextProvider
 
 TEACHER_RESPONSE_SCHEMA_VERSION = "gwent-teacher-response-v1"
+TEACHER_TURN_RESPONSE_SCHEMA_VERSION = "gwent-teacher-turn-response-v1"
 
 
 class TeacherAgent:
@@ -75,6 +77,119 @@ class TeacherAgent:
             grounded_facts=tuple(grounded),
             caveats=tuple(caveats),
             prompt=prompt if request.level == "advanced" else None,
+        )
+
+    def explain_turn(self, request: TeacherTurnRequest) -> TeacherTurnResponse:
+        """Explain one Core-produced AI-guidance action chain.
+
+        The branch actions have already been selected and applied on a cloned
+        environment. Teacher converts their structured evidence to language;
+        it never creates an additional action or candidate list.
+        """
+
+        if request.level not in {"beginner", "intermediate", "advanced"}:
+            raise ValueError(f"unsupported teacher level: {request.level}")
+        if request.turn_trace.get("schema_version") != "counterfactual-action-chain-v2":
+            raise ValueError("Teacher requires counterfactual-action-chain-v2")
+        raw_root = request.turn_trace.get("root")
+        if not isinstance(raw_root, dict):
+            raise ValueError("counterfactual action-chain trace requires a root object")
+        try:
+            root_decision_serial = int(raw_root["decision_serial"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError("counterfactual action-chain root requires decision_serial") from exc
+        raw_steps = request.turn_trace.get("steps")
+        if not isinstance(raw_steps, list) or not raw_steps:
+            raise ValueError("counterfactual action-chain trace contains no steps")
+
+        responses: list[TeacherResponse] = []
+        facts: list[str] = []
+        for raw_step in raw_steps:
+            if not isinstance(raw_step, dict):
+                raise ValueError("counterfactual action-chain step must be an object")
+            role = raw_step.get("role")
+            parent_serial = raw_step.get("parent_decision_serial")
+            if role == "root_action":
+                if raw_step.get("decision_serial") != root_decision_serial or parent_serial is not None:
+                    raise ValueError("action-chain root step does not match root metadata")
+            elif role == "required_choice":
+                if parent_serial != root_decision_serial:
+                    raise ValueError("action-chain choice does not belong to the root action")
+            else:
+                raise ValueError("action-chain step role must be root_action or required_choice")
+            packet = {
+                "schema_version": "decision-packet-v0",
+                "decision_serial": raw_step.get("decision_serial"),
+                "actor_id": raw_step.get("actor_id"),
+                "decision_kind": raw_step.get("kind"),
+                "recommended_option_index": raw_step.get("index"),
+                "state_value": raw_step.get("value"),
+                # The branch deliberately supplies only the chosen, already
+                # simulated action. This avoids exposing any candidate set.
+                "candidates": [
+                    {
+                        "option_index": raw_step.get("index"),
+                        "probability": raw_step.get("confidence"),
+                        "option_kind": raw_step.get("kind"),
+                        "card_id": raw_step.get("card_id"),
+                        "source_card_id": raw_step.get("source_card_id"),
+                        "target_card_id": raw_step.get("target_card_id"),
+                        "source_zone": raw_step.get("source_zone"),
+                        "actor_id": raw_step.get("actor_id"),
+                        "source_object_index": raw_step.get("source_object_index"),
+                        "target_object_index": raw_step.get("target_object_index"),
+                        "target_side_id": raw_step.get("target_side"),
+                        "target_zone_id": raw_step.get("target_zone"),
+                        "target_row_id": raw_step.get("target_row"),
+                        "insert_position": raw_step.get("insert_position"),
+                    }
+                ],
+                "evidence": {
+                    "live_safe": True,
+                    "counterfactual_turn": True,
+                    "candidates_redacted": True,
+                },
+            }
+            before = raw_step.get("summary_before")
+            public_state = {"summary": before} if isinstance(before, dict) else {}
+            response = self.explain(
+                TeacherRequest(
+                    decision_packet=packet,
+                    public_state=public_state,
+                    level=request.level,
+                    language=request.language,
+                    top_k=request.top_k,
+                )
+            )
+            responses.append(
+                replace(
+                    response,
+                    action_role=str(role),
+                    parent_decision_serial=int(parent_serial) if parent_serial is not None else None,
+                )
+            )
+            facts.extend(response.grounded_facts)
+
+        stopped_reason = str(request.turn_trace.get("stopped_reason") or "unknown")
+        stop_text = {
+            "action_chain_resolved": "该次指导动作及其必要选择已完成。",
+            "game_finished": "对局在本次推演中结束。",
+            "budget_exceeded": "推演达到安全步数上限后停止。",
+        }.get(stopped_reason, "推演已停止。")
+        return TeacherTurnResponse(
+            schema_version=TEACHER_TURN_RESPONSE_SCHEMA_VERSION,
+            level=request.level,
+            headline="如果由 AI 接管，当前局面推荐的行动链",
+            explanation=f"策略已在独立的只读分支中完成 1 个根行动和 {len(responses) - 1} 个必要选择。{stop_text}",
+            stopped_reason=stopped_reason,
+            steps=tuple(responses),
+            root_decision_serial=root_decision_serial,
+            boundary=str(request.turn_trace.get("boundary") or ""),
+            grounded_facts=tuple(dict.fromkeys(facts)),
+            caveats=(
+                "这是基于当前局面的只读行动链推演；其中动作没有执行到真实对局。",
+                "每一步均由 Core 合法动作与策略输出产生，不是神经网络隐藏思维过程。",
+            ),
         )
 
     @staticmethod

@@ -37,14 +37,16 @@ $core-environment      $training-config     $product-integration
 
 ## Skill contract
 
-本仓库的 Skill 以 `SKILL.md` 的 **metadata + operational instructions** 为主体，并按需使用 `references/` 与 `scripts/`：
+一个 Skill 至少应该包含：
 
-- metadata/description 负责触发范围；
-- SKILL.md 说明 authoritative source、workflow、关键 invariant、verification 与 handoff；
-- references 保存按需加载的 contract、schema 与领域规则；
-- scripts 固化 fragile/repeatable 的确定性检查，并统一提供 `scripts/verify.py` 入口。
+1. **Trigger**：什么任务必须读取它；
+2. **Workflow**：处理顺序；
+3. **Invariant**：绝不能破坏的工程边界；
+4. **References / scripts**：事实来源和自动检查；
+5. **Verification**：完成任务前必须给出的证据；
+6. **Handoff**：什么时候停止修改并交给另一个 Agent。
 
-Skill 不写项目百科，也不为一次性任务临时新增。重复出现、容易被 Coding Agent 判断错的工程决策才进入 Skill。真正的业务实现仍在仓库代码中，Skill 负责约束“怎么安全地改”。
+Skill 不写项目百科，也不为一次性任务临时新增。重复出现的工程判断才进入 Skill。
 
 ## Core Agent
 
@@ -114,4 +116,4 @@ PYTHONPATH=apps/web/backend pytest -q apps/web/backend/tests
 cd apps/web/frontend && npm ci && npm run build
 ```
 
-最终说明应包含：改了什么、为什么、读取了哪个 Skill/contract、运行了哪个 Skill verification、验证结果、是否跨越 Agent 边界。
+最终说明应包含：改了什么、为什么、读取了哪个 Skill/contract、验证结果、是否跨越 Agent 边界。

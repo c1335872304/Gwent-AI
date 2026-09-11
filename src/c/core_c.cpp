@@ -10,6 +10,7 @@
 #include <exception>
 #include <new>
 #include <limits>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -99,6 +100,24 @@ struct gwent_rl_collector {
 };
 
 namespace {
+
+void detach_pending_resolution_frame(gwent::GameState& state) {
+    if (!state.pending_choice.has_value() || !state.pending_choice->resolution_frame) {
+        return;
+    }
+
+    // A PendingChoice owns its in-progress resolution through a shared_ptr so
+    // staged choices within one game can resume the same task tail. A product
+    // preview, however, is a separate game branch: sharing this frame would
+    // let a choice made by the preview append to the live game's prefix and
+    // mutate its budgets/trigger stack. Copy all mutable frame state here.
+    const std::shared_ptr<gwent::ResolutionFrame>& source = state.pending_choice->resolution_frame;
+    auto detached = std::make_shared<gwent::ResolutionFrame>(*source);
+    if (source->root_state_before) {
+        detached->root_state_before = std::make_shared<gwent::GameState>(*source->root_state_before);
+    }
+    state.pending_choice->resolution_frame = std::move(detached);
+}
 
 class RlSurfaceOverflow : public std::runtime_error {
 public:
@@ -1729,6 +1748,23 @@ gwent_rl_env* gwent_rl_env_create(const gwent_rl_config* config) {
         rebuild_rl_observation(*env);
         fill_zero_step_result(*env, GWENT_C_OK, GWENT_C_ACTION_APPLIED, nullptr);
         return env;
+    } catch (...) {
+        return nullptr;
+    }
+}
+
+gwent_rl_env* gwent_rl_env_clone(const gwent_rl_env* source) {
+    if (source == nullptr) {
+        return nullptr;
+    }
+    try {
+        auto* clone = new gwent_rl_env(*source);
+        // Most environment fields are value-owned. PendingChoice is the one
+        // exception: its ResolutionFrame deliberately uses shared ownership
+        // inside a live staged resolution, so detach it before a preview can
+        // step the cloned game.
+        detach_pending_resolution_frame(clone->game.mutable_state());
+        return clone;
     } catch (...) {
         return nullptr;
     }

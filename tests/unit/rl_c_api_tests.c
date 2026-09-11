@@ -134,6 +134,21 @@ static void test_rl_env_reset_and_observation(void) {
     assert(checksum_a.data != 0);
     assert(checksum_a.size > 0);
 
+    /* Product-side teacher rollouts must run on an independent clone. */
+    gwent_rl_env* preview = gwent_rl_env_clone(env);
+    assert(preview != 0);
+    assert(gwent_rl_env_observation(preview)->option_count == obs->option_count);
+    gwent_rl_step_result preview_step = {0};
+    assert(gwent_rl_env_step_option(preview, 0, &preview_step) == GWENT_C_OK);
+    gwent_c_string source_after_preview = {0};
+    assert(gwent_rl_env_checksum(env, &source_after_preview) == GWENT_C_OK);
+    assert(source_after_preview.size == checksum_a.size);
+    for (size_t i = 0; i < checksum_a.size; ++i) {
+        assert(source_after_preview.data[i] == checksum_a.data[i]);
+    }
+    gwent_c_string_free(&source_after_preview);
+    gwent_rl_env_destroy(preview);
+
     gwent_rl_step_result reset_result = {0};
     assert(gwent_rl_env_reset(env, 1234, -1, &reset_result) == GWENT_C_OK);
     assert(reset_result.result_code == GWENT_C_OK);
@@ -264,6 +279,100 @@ static void test_rl_unit_play_uses_row_subdecision_and_prefix(void) {
     gwent_rl_env_destroy(env);
 }
 
+static void test_rl_env_clone_detaches_pending_resolution_frame(void) {
+    gwent_rl_config config = gwent_rl_default_config();
+    config.seed = 777;
+    config.enable_invariants = 1;
+
+    gwent_rl_env* env = gwent_rl_env_create(&config);
+    assert(env != 0);
+    finish_opening_mulligans(env);
+
+    const gwent_rl_observation* obs = gwent_rl_env_observation(env);
+    size_t play_index = (size_t)-1;
+    for (size_t i = 0; i < obs->option_count; ++i) {
+        if (obs->option_kind_ids[i] != GWENT_RL_OPTION_PLAY_CARD) {
+            continue;
+        }
+        const int source_index = obs->option_source_object_indices[i];
+        if (source_index < 0 || (size_t)source_index >= obs->object_count) {
+            continue;
+        }
+        const float is_unit = obs->object_features[(size_t)source_index * GWENT_RL_OBJECT_FEATURE_COUNT + 22];
+        if (is_unit > 0.5f) {
+            play_index = i;
+            break;
+        }
+    }
+    assert(play_index != (size_t)-1);
+
+    gwent_rl_step_result step = {0};
+    assert(gwent_rl_env_step_option(env, play_index, &step) == GWENT_C_OK);
+    obs = gwent_rl_env_observation(env);
+    assert(obs->decision_kind == GWENT_RL_DECISION_ROW_TARGET);
+    assert(obs->prefix_count == 1);
+
+    gwent_c_string checksum_before = {0};
+    assert(gwent_rl_env_checksum(env, &checksum_before) == GWENT_C_OK);
+
+    /* Repeated Teacher-like previews must not append choices to the live
+     * pending resolution. Before the clone fix, these copies shared the
+     * ResolutionFrame and overflowed the live prefix after eight previews. */
+    for (int preview_number = 0; preview_number < 10; ++preview_number) {
+        gwent_rl_env* preview = gwent_rl_env_clone(env);
+        assert(preview != 0);
+
+        const gwent_rl_observation* preview_obs = gwent_rl_env_observation(preview);
+        assert(preview_obs->decision_kind == GWENT_RL_DECISION_ROW_TARGET);
+        assert(gwent_rl_env_step_option(preview, 0, &step) == GWENT_C_OK);
+
+        preview_obs = gwent_rl_env_observation(preview);
+        assert(preview_obs->decision_kind == GWENT_RL_DECISION_INSERT_POSITION);
+        assert(gwent_rl_env_step_option(preview, 0, &step) == GWENT_C_OK);
+        gwent_rl_env_destroy(preview);
+    }
+
+    obs = gwent_rl_env_observation(env);
+    assert(obs->decision_kind == GWENT_RL_DECISION_ROW_TARGET);
+    assert(obs->prefix_count == 1);
+    gwent_c_string checksum_after = {0};
+    assert(gwent_rl_env_checksum(env, &checksum_after) == GWENT_C_OK);
+    assert(checksum_after.size == checksum_before.size);
+    assert(memcmp(checksum_after.data, checksum_before.data, checksum_before.size) == 0);
+    gwent_c_string_free(&checksum_after);
+    gwent_c_string_free(&checksum_before);
+
+    /* The live choice remains independently resumable after every preview. */
+    assert(gwent_rl_env_step_option(env, 0, &step) == GWENT_C_OK);
+    obs = gwent_rl_env_observation(env);
+    assert(obs->decision_kind == GWENT_RL_DECISION_INSERT_POSITION);
+
+    /* Clone from the next pending-choice phase as well.  This catches a
+     * shallow copy introduced only after the row choice resumes the root
+     * resolution and prepares the insert-position continuation. */
+    gwent_c_string insert_checksum_before = {0};
+    assert(gwent_rl_env_checksum(env, &insert_checksum_before) == GWENT_C_OK);
+    for (int preview_number = 0; preview_number < 10; ++preview_number) {
+        gwent_rl_env* preview = gwent_rl_env_clone(env);
+        assert(preview != 0);
+        const gwent_rl_observation* preview_obs = gwent_rl_env_observation(preview);
+        assert(preview_obs->decision_kind == GWENT_RL_DECISION_INSERT_POSITION);
+        assert(gwent_rl_env_step_option(preview, 0, &step) == GWENT_C_OK);
+        gwent_rl_env_destroy(preview);
+    }
+    obs = gwent_rl_env_observation(env);
+    assert(obs->decision_kind == GWENT_RL_DECISION_INSERT_POSITION);
+    gwent_c_string insert_checksum_after = {0};
+    assert(gwent_rl_env_checksum(env, &insert_checksum_after) == GWENT_C_OK);
+    assert(insert_checksum_after.size == insert_checksum_before.size);
+    assert(memcmp(insert_checksum_after.data, insert_checksum_before.data, insert_checksum_before.size) == 0);
+    gwent_c_string_free(&insert_checksum_after);
+    gwent_c_string_free(&insert_checksum_before);
+
+    assert(gwent_rl_env_step_option(env, 0, &step) == GWENT_C_OK);
+    gwent_rl_env_destroy(env);
+}
+
 static void test_rl_env_random_rollout(void) {
     gwent_rl_config config = gwent_rl_default_config();
     config.seed = 424242;
@@ -352,6 +461,7 @@ int main(void) {
     test_rl_env_selects_deck_b();
     test_rl_oracle_mode_can_expose_opponent_hand_for_debug();
     test_rl_unit_play_uses_row_subdecision_and_prefix();
+    test_rl_env_clone_detaches_pending_resolution_frame();
     test_rl_env_random_rollout();
     test_rl_dense_reward_mode_can_emit_step_rewards();
     return 0;

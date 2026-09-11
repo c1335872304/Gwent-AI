@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { getGameState, newGame, step } from "../api/game"
+import { HttpError } from "../api/client"
 import { ActionPanel } from "../components/ActionPanel"
 import { AiPanel } from "../components/AiPanel"
 import { Card } from "../components/Card"
@@ -106,7 +107,12 @@ export function GamePage() {
       }
       if (options.resetAiHistory) setActedTurn(null)
     } catch (exc) {
-      setError(exc instanceof Error ? exc.message : String(exc))
+      if (exc instanceof HttpError && exc.status === 409 && exc.code === "stale_state") {
+        await load()
+        setError("局面已更新，已刷新为最新合法动作。")
+      } else {
+        setError(exc instanceof Error ? exc.message : String(exc))
+      }
     } finally {
       setBusy(false)
     }
@@ -228,7 +234,7 @@ export function GamePage() {
 
   function runAction(action: GameAction) {
     if (!game || busy) return
-    void run(() => step(action.index), {
+    void run(() => step(action.index, game.match_id, game.revision), {
       actionKind: action.kind,
       actionTurnKey: currentTurnKey,
     })

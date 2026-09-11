@@ -30,10 +30,14 @@ export function newGame(
   })
 }
 
-export function step(optionIndex: number): Promise<GameState> {
+export function step(optionIndex: number, matchId: string, expectedRevision: number): Promise<GameState> {
   return requestJson<GameState>("/api/game/step", {
     method: "POST",
     headers: jsonHeaders,
-    body: JSON.stringify({ option_index: optionIndex }),
+    body: JSON.stringify({
+      option_index: optionIndex,
+      match_id: matchId,
+      expected_revision: expectedRevision,
+    }),
   })
 }

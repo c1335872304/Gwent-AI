@@ -7,6 +7,7 @@ from pydantic import BaseModel, ValidationError
 
 from app.models.core_contract import (
     CORE_API_VERSION,
+    CounterfactualActionChainTrace,
     CoreHealth,
     CoreReloadResult,
     GameMode,
@@ -17,6 +18,17 @@ ModelT = TypeVar("ModelT", bound=BaseModel)
 
 
 class GwentCoreError(RuntimeError):
+    pass
+
+
+class GwentCoreCommandError(GwentCoreError):
+    def __init__(self, status_code: int, code: str, message: str) -> None:
+        super().__init__(message)
+        self.status_code = status_code
+        self.code = code
+
+
+class GwentCoreStaleStateError(GwentCoreCommandError):
     pass
 
 
@@ -69,6 +81,13 @@ class GwentCoreClient:
                 detail = payload.get("detail", payload) if isinstance(payload, dict) else payload
             except ValueError:
                 pass
+            if isinstance(detail, dict):
+                code = str(detail.get("code", "core_error"))
+                message = str(detail.get("message", detail))
+                if response.status_code == 409 and code == "stale_state":
+                    raise GwentCoreStaleStateError(response.status_code, code, message)
+                if response.status_code in (409, 422):
+                    raise GwentCoreCommandError(response.status_code, code, message)
             raise GwentCoreError(f"Core returned HTTP {response.status_code}: {detail}")
 
         try:
@@ -119,9 +138,34 @@ class GwentCoreClient:
         )
         return self._validate(GameState, payload)
 
-    async def step(self, option_index: int) -> GameState:
-        payload = await self._request_json("POST", "/step", json={"option_index": option_index})
+    async def step(
+        self,
+        option_index: int,
+        match_id: str | None = None,
+        expected_revision: int | None = None,
+    ) -> GameState:
+        payload = await self._request_json(
+            "POST",
+            "/step",
+            json={
+                "option_index": option_index,
+                "match_id": match_id,
+                "expected_revision": expected_revision,
+            },
+        )
         return self._validate(GameState, payload)
+
+    async def preview_current_human_turn(
+        self,
+        match_id: str | None = None,
+        expected_revision: int | None = None,
+    ) -> CounterfactualActionChainTrace:
+        payload = await self._request_json(
+            "POST",
+            "/preview/current-human-turn",
+            json={"match_id": match_id, "expected_revision": expected_revision},
+        )
+        return self._validate(CounterfactualActionChainTrace, payload)
 
     async def reload_model(self, checkpoint: str | None = None) -> CoreReloadResult:
         payload = await self._request_json("POST", "/reload", json={"checkpoint": checkpoint})

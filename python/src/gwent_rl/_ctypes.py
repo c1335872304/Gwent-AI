@@ -100,6 +100,90 @@ class GwentRlRewardConfig(ct.Structure):
         ("max_step_reward_abs", ct.c_float),
     ]
 
+
+class GwentRlConfig(ct.Structure):
+    """Mirror of the single-environment ``gwent_rl_config`` C ABI struct.
+
+    Keep this definition beside the collector types.  Product-side inference
+    adapters import it instead of maintaining a second ctypes layout.
+    """
+
+    _fields_ = [
+        ("seed", ct.c_uint64),
+        ("starting_player_id", ct.c_int),
+        ("shuffle_decks", ct.c_int),
+        ("enable_invariants", ct.c_int),
+        ("current_player_perspective", ct.c_int),
+        ("include_private_info", ct.c_int),
+        ("reward_config", GwentRlRewardConfig),
+        ("player0_deck_id", ct.c_int),
+        ("player1_deck_id", ct.c_int),
+    ]
+
+
+class GwentRlStepResult(ct.Structure):
+    """Mirror of the single-environment ``gwent_rl_step_result`` C ABI struct."""
+
+    _fields_ = [
+        ("result_code", ct.c_int),
+        ("action_status", ct.c_int),
+        ("done", ct.c_int),
+        ("actor_id", ct.c_int),
+        ("winner_id", ct.c_int),
+        ("reward", ct.c_float * 2),
+        ("option_count", ct.c_size_t),
+    ]
+
+
+class GwentRlObservation(ct.Structure):
+    """Mirror of the fixed-size ``gwent_rl_observation`` C ABI struct."""
+
+    _fields_ = [
+        ("schema_version", ct.c_int),
+        ("actor_id", ct.c_int),
+        ("opponent_id", ct.c_int),
+        ("perspective_player_id", ct.c_int),
+        ("decision_kind", ct.c_int),
+        ("done", ct.c_int),
+        ("winner_id", ct.c_int),
+        ("source_object_index", ct.c_int),
+        ("source_entity_id", ct.c_int),
+        ("source_card_id", ct.c_int),
+        ("object_count", ct.c_size_t),
+        ("option_count", ct.c_size_t),
+        ("prefix_count", ct.c_size_t),
+        ("global_features", ct.c_float * GWENT_RL_GLOBAL_FEATURE_COUNT),
+        ("object_entity_ids", ct.c_int * GWENT_RL_MAX_OBJECTS),
+        ("object_card_ids", ct.c_int * GWENT_RL_MAX_OBJECTS),
+        ("object_owner_ids", ct.c_int * GWENT_RL_MAX_OBJECTS),
+        ("object_controller_ids", ct.c_int * GWENT_RL_MAX_OBJECTS),
+        ("object_zone_ids", ct.c_int * GWENT_RL_MAX_OBJECTS),
+        ("object_row_ids", ct.c_int * GWENT_RL_MAX_OBJECTS),
+        ("object_slot_indices", ct.c_int * GWENT_RL_MAX_OBJECTS),
+        ("object_mask", ct.c_ubyte * GWENT_RL_MAX_OBJECTS),
+        ("object_features", ct.c_float * (GWENT_RL_MAX_OBJECTS * GWENT_RL_OBJECT_FEATURE_COUNT)),
+        ("option_kind_ids", ct.c_int * GWENT_RL_MAX_OPTIONS),
+        ("option_card_ids", ct.c_int * GWENT_RL_MAX_OPTIONS),
+        ("option_source_object_indices", ct.c_int * GWENT_RL_MAX_OPTIONS),
+        ("option_target_object_indices", ct.c_int * GWENT_RL_MAX_OPTIONS),
+        ("option_target_side_ids", ct.c_int * GWENT_RL_MAX_OPTIONS),
+        ("option_target_zone_ids", ct.c_int * GWENT_RL_MAX_OPTIONS),
+        ("option_target_row_ids", ct.c_int * GWENT_RL_MAX_OPTIONS),
+        ("option_insert_positions", ct.c_int * GWENT_RL_MAX_OPTIONS),
+        ("option_hand_slot_indices", ct.c_int * GWENT_RL_MAX_OPTIONS),
+        ("option_stable_hashes", ct.c_uint64 * GWENT_RL_MAX_OPTIONS),
+        ("option_mask", ct.c_ubyte * GWENT_RL_MAX_OPTIONS),
+        ("option_features", ct.c_float * (GWENT_RL_MAX_OPTIONS * GWENT_RL_OPTION_FEATURE_COUNT)),
+        ("prefix_kind_ids", ct.c_int * GWENT_RL_MAX_PREFIX),
+        ("prefix_source_object_indices", ct.c_int * GWENT_RL_MAX_PREFIX),
+        ("prefix_target_object_indices", ct.c_int * GWENT_RL_MAX_PREFIX),
+        ("prefix_card_ids", ct.c_int * GWENT_RL_MAX_PREFIX),
+        ("prefix_row_ids", ct.c_int * GWENT_RL_MAX_PREFIX),
+        ("prefix_insert_positions", ct.c_int * GWENT_RL_MAX_PREFIX),
+        ("prefix_mask", ct.c_ubyte * GWENT_RL_MAX_PREFIX),
+    ]
+
+
 class GwentRlCollectorConfig(ct.Structure):
     _fields_ = [
         ("num_envs", ct.c_size_t),

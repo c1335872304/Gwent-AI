@@ -39,3 +39,17 @@ Observation schema breaking change；两者应分别判断并按 `SCHEMA_CONTRAC
 除专项语义测试外，至少覆盖：core model、legal actions、pending decision、kernel/reducer、trace snapshot、
 C API smoke、RL C API、RL collector C API 和 Python ctypes/decision packet。权威结果只来自 AGENTS.md
 指定的 Linux server/build环境。
+
+## 只读分支 / clone 不变量
+
+产品的 Teacher 或分析工具可以在 clone 环境中执行反事实分支，但 clone 不是浅复制的 synonym。
+`PendingChoice` 的 `ResolutionFrame` 保存可变的 decision prefix、trigger stack、预算和 root rollback snapshot；
+它在同一真实对局的 staged choice 内可以共享，在不同环境实例之间绝不能共享。
+
+当修改 `gwent_rl_env_clone`、snapshot 或 pending-choice copy 路径时：
+
+1. 分支必须深拷贝全部可变 `ResolutionFrame` 状态与回滚快照；
+2. 只读分支每一步只能执行自己的 Core handle；
+3. 回归至少连续运行多次 clone 分支，覆盖 card/row/insert 等顺序选择；
+4. 验证真实环境的 checksum、legal actions、prefix 和后续真实 choice 均不变；
+5. 若分支导致真实局面的 `PREFIX_OVERFLOW`、预算变化或 stale decision，优先修复 clone 隔离，不能以扩大 RL 容量掩盖问题。

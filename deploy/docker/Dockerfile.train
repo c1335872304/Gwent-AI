@@ -1,0 +1,73 @@
+ARG PYTHON_BASE_IMAGE=python:3.10-slim-bookworm
+
+# Keep Core compilation inside the image build. The trainer therefore consumes
+# a library produced from the same source revision as its Python collector.
+FROM ${PYTHON_BASE_IMAGE} AS core-builder
+
+RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources \
+    && apt-get -o Acquire::Retries=5 update \
+    && apt-get -o Acquire::Retries=5 install -y --no-install-recommends cmake g++ ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY CMakeLists.txt ./
+COPY cmake ./cmake
+COPY include ./include
+COPY src ./src
+
+RUN cmake -S . -B /build-release -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_SHARED_LIBS=ON \
+        -DGWENT_BUILD_TESTS=OFF \
+        -DGWENT_BUILD_TRACE_TOOLS=OFF \
+        -DGWENT_INSTALL_TRACE_TOOLS=OFF \
+    && cmake --build /build-release --parallel
+
+FROM ${PYTHON_BASE_IMAGE} AS trainer
+
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
+ARG TORCH_VERSION=2.6.0+cpu
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/workspace/python/src \
+    GWENT_PROJECT_ROOT=/workspace \
+    GWENT_CORE_LIBRARY=/opt/gwent/lib/libgwent_core.so \
+    LD_LIBRARY_PATH=/opt/gwent/lib
+
+WORKDIR /workspace
+
+RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources \
+    && apt-get -o Acquire::Retries=5 update \
+    && apt-get -o Acquire::Retries=5 install -y --no-install-recommends libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY deploy/docker/requirements.train.txt /tmp/requirements.train.txt
+RUN python -m pip install --no-cache-dir --upgrade pip \
+    && python -m pip install --no-cache-dir -r /tmp/requirements.train.txt \
+    && python -m pip install --no-cache-dir --index-url "${TORCH_INDEX_URL}" "torch==${TORCH_VERSION}" \
+    && python -c "import numpy, torch; print('numpy=', numpy.__version__, 'torch=', torch.__version__)"
+
+# Training source, task definitions and embeddings are versioned with the image.
+# Compose may mount configs/tasks read-only for iterative local/server work.
+COPY python/src ./python/src
+COPY configs ./configs
+COPY training ./training
+COPY scripts ./scripts
+COPY data ./data
+COPY --from=core-builder /build-release/libgwent_core.so /opt/gwent/lib/libgwent_core.so
+COPY deploy/docker/entrypoint-trainer.sh /usr/local/bin/gwent-trainer-entrypoint
+
+RUN chmod 0555 /usr/local/bin/gwent-trainer-entrypoint \
+    && mkdir -p /workspace/runs /workspace/artifacts /workspace/models/v3 \
+    && chown -R 1000:1000 /workspace/runs /workspace/artifacts /workspace/models
+
+# The Compose service may override this numeric user to match a Linux training
+# host. Docker Desktop accepts the same numeric mapping for bind-mounted files.
+USER 1000:1000
+
+ENTRYPOINT ["/usr/local/bin/gwent-trainer-entrypoint"]
+
+# Safe default: preflight the low-cost task; never start a training run merely
+# because someone invoked `docker compose run trainer` without an explicit cmd.
+CMD ["python", "-m", "gwent_rl.training.cli", "plan", "--task", "/workspace/training/tasks/smoke.yaml", "--project-root", "/workspace", "--library", "/opt/gwent/lib/libgwent_core.so"]

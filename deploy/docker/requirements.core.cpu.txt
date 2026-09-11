@@ -1,0 +1,7 @@
+# Core HTTP adapter: inference only. Training dependencies and CUDA are not
+# installed in the local product image. Dockerfile.core installs the CPU
+# wheel for the same Torch 2.6.0 line used by the server environment.
+fastapi==0.141.1
+numpy==1.26.4
+pydantic==2.13.4
+uvicorn[standard]==0.52.3

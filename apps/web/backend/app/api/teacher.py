@@ -5,9 +5,11 @@ from typing import Any, Literal
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.clients.gwent_core import GwentCoreError, GwentCoreStaleStateError
 from app.clients.teacher import TeacherClient, TeacherError
 from app.models.core_contract import AiAction, GameState
 from app.services.game_service import GameService
+from app.services.teacher_preview_service import TeacherPreviewService
 
 router = APIRouter(prefix="/api/teacher", tags=["teacher"])
 
@@ -28,12 +30,32 @@ class TeacherExplainResponse(RequestModel):
     error: str | None = None
 
 
+class TeacherTurnPreviewRequest(RequestModel):
+    level: Literal["beginner", "intermediate", "advanced"] = "beginner"
+    top_k: int = Field(default=3, ge=1, le=8)
+    match_id: str | None = Field(default=None, pattern=r"^[0-9a-f]{32}$")
+    expected_revision: int | None = Field(default=None, ge=0)
+
+
+class TeacherTurnPreviewResponse(RequestModel):
+    ok: bool
+    base_match_id: str | None = None
+    base_revision: int | None = Field(default=None, ge=0)
+    stale: bool = False
+    response: dict[str, Any] | None = None
+    error: str | None = None
+
+
 def _game(request: Request) -> GameService:
     return request.app.state.game_service
 
 
 def _teacher(request: Request) -> TeacherClient:
     return request.app.state.teacher_client
+
+
+def _preview_service(request: Request) -> TeacherPreviewService:
+    return request.app.state.teacher_preview_service
 
 
 def _safe_packet(action: AiAction, game: GameState, position: int) -> dict[str, Any]:
@@ -119,3 +141,39 @@ async def explain(req: TeacherExplainRequest, request: Request) -> TeacherExplai
     except TeacherError as exc:
         return TeacherExplainResponse(ok=False, error=str(exc))
     return TeacherExplainResponse(ok=True, response=response)
+
+
+@router.post("/preview-turn", response_model=TeacherTurnPreviewResponse)
+async def preview_turn(
+    req: TeacherTurnPreviewRequest,
+    request: Request,
+) -> TeacherTurnPreviewResponse:
+    """Explain a Core-produced, read-only AI takeover of the human turn."""
+
+    try:
+        state = await _game(request).get_state()
+        if req.match_id is not None or req.expected_revision is not None:
+            if req.match_id != state.match_id or req.expected_revision != state.revision:
+                return TeacherTurnPreviewResponse(
+                    ok=False,
+                    base_match_id=state.match_id,
+                    base_revision=state.revision,
+                    stale=True,
+                    error="局面已更新，已丢弃旧的教师请求。",
+                )
+        trace, response = await _preview_service(request).preview_turn(state, req.level, req.top_k)
+    except GwentCoreStaleStateError as exc:
+        return TeacherTurnPreviewResponse(ok=False, stale=True, error=str(exc))
+    except GwentCoreError as exc:
+        # A preview is optional teaching UX. A state where no human turn is
+        # available should not be surfaced as a gameplay failure.
+        return TeacherTurnPreviewResponse(ok=False, error=str(exc))
+
+    except TeacherError as exc:
+        return TeacherTurnPreviewResponse(ok=False, error=str(exc))
+    return TeacherTurnPreviewResponse(
+        ok=True,
+        base_match_id=trace.base_match_id,
+        base_revision=trace.base_revision,
+        response=response,
+    )

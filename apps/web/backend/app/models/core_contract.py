@@ -40,6 +40,7 @@ class GameObject(ContractModel):
     card_id: int
     name: str
     type: str
+    ability_text: str
     owner: int
     controller: int
     zone: int
@@ -118,6 +119,8 @@ GameMode = Literal["human_vs_ai", "manual_test"]
 
 class GameState(ContractModel):
     api_version: int
+    match_id: str = Field(pattern=r"^[0-9a-f]{32}$")
+    revision: int = Field(ge=0)
     summary: GameSummary
     objects: list[GameObject]
     row_effects: list[RowEffect]
@@ -129,6 +132,62 @@ class GameState(ContractModel):
     device: str
     decks: DeckSelection
     mode: GameMode = "manual_test"
+
+
+class CounterfactualActionChainStep(AiAction):
+    """One Core/Strategy action executed only inside a preview branch."""
+
+    decision_serial: int = Field(ge=1)
+    parent_decision_serial: int | None = Field(default=None, ge=1)
+    role: Literal["root_action", "required_choice"]
+    actor_id: Literal[0]
+    source_card_id: int
+    target_card_id: int
+    source_zone: int
+    summary_before: GameSummary
+    summary_after: GameSummary
+
+
+class CounterfactualActionChainRoot(ContractModel):
+    """The one voluntary action selected by the policy for this guidance."""
+
+    decision_serial: int = Field(ge=1)
+    kind: str
+    card_id: int
+    source_object_index: int
+
+
+class CounterfactualActionChainTrace(ContractModel):
+    """Read-only AI guidance: one root action plus Core-required choices."""
+
+    api_version: int
+    schema_version: Literal["counterfactual-action-chain-v2"]
+    base_match_id: str = Field(pattern=r"^[0-9a-f]{32}$")
+    base_revision: int = Field(ge=0)
+    base_state_signature: str = Field(pattern=r"^[0-9a-f]{64}$")
+    controlled_player: Literal[0]
+    boundary: Literal["one_root_action_with_required_choices"]
+    root: CounterfactualActionChainRoot
+    status: Literal["complete", "stopped"]
+    stopped_reason: str
+    steps: list[CounterfactualActionChainStep] = Field(min_length=1)
+    start_summary: GameSummary
+    end_summary: GameSummary
+
+    @model_validator(mode="after")
+    def validate_action_chain(self) -> "CounterfactualActionChainTrace":
+        roots = [step for step in self.steps if step.role == "root_action"]
+        if len(roots) != 1:
+            raise ValueError("action-chain trace must contain exactly one root_action")
+        root_step = roots[0]
+        if root_step.decision_serial != self.root.decision_serial:
+            raise ValueError("root decision_serial must match the root_action step")
+        if root_step.parent_decision_serial is not None:
+            raise ValueError("root_action cannot have a parent_decision_serial")
+        for step in self.steps:
+            if step.role == "required_choice" and step.parent_decision_serial != self.root.decision_serial:
+                raise ValueError("required_choice must belong to the root action")
+        return self
 
 
 class CoreHealth(ContractModel):

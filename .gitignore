@@ -36,10 +36,10 @@ apps/web/frontend/dist/
 
 # Local service secrets/config
 services/*/.env
+deploy/docker/.env
 apps/web/frontend/*.tsbuildinfo
 # Local inference model. Keep the slot/docs, not the binary artifact.
 models/**/*.pt
 models/**/*.pth
 models/**/*.ckpt
 models/**/installed.json
-

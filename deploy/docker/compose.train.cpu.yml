@@ -1,0 +1,7 @@
+services:
+  trainer:
+    image: gwent-trainer:cpu
+    build:
+      args:
+        TORCH_INDEX_URL: https://download.pytorch.org/whl/cpu
+        TORCH_VERSION: 2.6.0+cpu
