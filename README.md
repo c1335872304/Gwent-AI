@@ -1,6 +1,8 @@
-# Gwent AI
+# Gwent-AI：昆特牌智能决策与解释系统
 
-Gwent AI 是一个 **Skill-driven vibe coding** 游戏 AI 工程。项目的重点不是单独展示某个模型，而是展示如何用 **专用 Coding Agent + Skill + Contract + Eval** 驱动一个跨 C++ 规则引擎、强化学习、Teacher Agent 和 Web 产品的复杂系统持续演进。
+Gwent-AI 是一个 **Skill-driven Coding Agent** 游戏 AI 工程。项目的重点不是单独展示某个模型，而是展示如何用 **专用 Coding Agent + Skill + Contract + Eval** 驱动一个跨 C++ 规则引擎、强化学习、Teacher Runtime 和 Web 产品的复杂系统持续演进。
+
+运行时使用 **Transformer + PPO** 策略模型；本地产品支持 Docker 人机对战和 AI 教师指导。Teacher 基于结构化 evidence 解释 Core 已执行的动作或反事实分支，不把语言模型作为游戏决策者。
 
 ## 1. 项目核心：Skill-driven 开发系统
 
@@ -146,19 +148,24 @@ Teacher                            -X-> option_index / legal action / reward
 
 详见 [Teacher 与 Web](docs/current/TEACHER_AND_WEB.md)。
 
-## 6. Web Product
+## 6. Web Product 与本地 Docker
 
 ```text
-React Frontend :5173
+Browser :8080
+       │ same-origin /api
+       ▼
+web / Nginx
        │
        ▼
 FastAPI BFF :8010
     /          \
    ▼            ▼
-Core :8008   Teacher :8020
+Core :8008   Teacher :8020（可选）
 ```
 
-对局页包含战场、手牌、合法动作、动态插入位置、AI 决策记录和 AI 教师面板。Teacher 是可选旁路：解释服务失败不会影响游戏继续。
+对局页包含战场、手牌、合法动作、动态插入位置、AI 决策记录和 AI 教师面板。Teacher 会根据人类当前局面进行一整回合的只读推演，输出“建议动作 -> 必要选择 -> 行动理由”的完整指导链；Teacher 失败不会影响游戏继续。
+
+宿主机只公开 `127.0.0.1:8080`；Core、BFF 和 Teacher 位于 Compose 内部网络。模型目录以只读卷挂载给 Core。
 
 ## 7. 仓库结构
 
@@ -194,3 +201,52 @@ python scripts/check.py test
 ```
 
 更完整的构建、训练、Teacher 和 Web 启动方式见 [开发与运行](docs/current/DEVELOPMENT.md)。
+
+## 9. Docker 快速开始
+
+### 本地 CPU 人机对战
+
+前置条件：安装 Docker Desktop，并将最终模型放入 `models/v3/policy.pt`。本地推理只需要该模型，不需要服务器训练产生的 `runs/`、中间 checkpoint 或 optimizer state。
+
+```powershell
+Copy-Item deploy/docker/.env.example deploy/docker/.env
+docker compose --env-file deploy/docker/.env -f deploy/docker/compose.cpu.yml --profile teacher up -d --build
+```
+
+完成后打开 [http://127.0.0.1:8080](http://127.0.0.1:8080)。停止服务：
+
+```powershell
+docker compose --env-file deploy/docker/.env -f deploy/docker/compose.cpu.yml down
+```
+
+### 固定测试容器
+
+测试容器固定 Python 3.10、CPU Torch、pytest 与项目测试依赖，并通过 bind mount 读取当前代码；它不需要启动完整产品服务。
+
+```powershell
+docker compose --env-file deploy/docker/.env -f deploy/docker/compose.cpu.yml --profile test build test
+docker compose --env-file deploy/docker/.env -f deploy/docker/compose.cpu.yml --profile test run --rm test
+```
+
+### 训练 Docker
+
+训练容器直接加载 `libgwent_core.so` 进行 Collector/PPO 采样，不经过 Core HTTP。CPU Docker 用于本地 smoke；GPU 与 `num_envs: 512` 的正式训练只应在训练服务器执行。
+
+```powershell
+docker compose --env-file deploy/docker/.env.train -f deploy/docker/compose.train.yml -f deploy/docker/compose.train.cpu.yml build trainer
+docker compose --env-file deploy/docker/.env.train -f deploy/docker/compose.train.yml -f deploy/docker/compose.train.cpu.yml run --rm trainer
+```
+
+默认 Trainer 命令只检查 smoke task 计划，不会开始训练。详细操作见 [训练 Docker](docs/current/TRAINING_DOCKER.md)。
+
+## 10. 当前文档入口
+
+| 需求 | 首先阅读 |
+|---|---|
+| 当前架构、版本、验证基线 | [项目基线](docs/current/PROJECT_BASELINE.md) |
+| C++ Core / C ABI / schema / grammar | [Core Contracts](docs/current/CORE_CONTRACTS.md) |
+| 本地 Docker 对战与测试 | [Local Docker](docs/current/LOCAL_DOCKER.md) |
+| 训练 Docker、CPU smoke、服务器 GPU 训练 | [Training Docker](docs/current/TRAINING_DOCKER.md) |
+| AI 教师与 Web 集成 | [Teacher and Web](docs/current/TEACHER_AND_WEB.md) |
+| 测试矩阵与未执行项 | [Project Test Plan](docs/current/PROJECT_TEST_PLAN.md) |
+| Skill / Coding Agent 体系 | [Skill System](docs/current/SKILL_SYSTEM.md) |
