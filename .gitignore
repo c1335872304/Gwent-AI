@@ -43,3 +43,7 @@ models/**/*.pt
 models/**/*.pth
 models/**/*.ckpt
 models/**/installed.json
+
+# Public inference asset for the GitHub project demo. Other model artifacts
+# and training checkpoints remain ignored.
+!models/v3/policy.pt
